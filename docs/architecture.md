@@ -2,7 +2,7 @@
 
 ## Status
 
-The development branch provides a metadata registry and a LangChain Core tool adapter. The optional in-process TypeMCP bridge is also shipped through `type-chain/typemcp`; it creates standard LangChain tools and agents without starting an MCP transport. The direct `@Agent()` builder and runtime policy enforcement remain separately scoped.
+The development branch exposes a metadata registry and optional LangChain adapters. Import `type-chain/langchain` for decorated tools, `type-chain/agent` for the direct `@Agent()` builder, or `type-chain/typemcp` for in-process TypeMCP composition. Root metadata imports stay independent of optional peers; TypeChain does not enforce runtime policy.
 
 ## Current implementation
 
@@ -23,7 +23,7 @@ The bridge delegates schema validation, metadata interpretation, and resolver be
 
 ## Intended scope
 
-The next layer will collect adapted tools for explicit `createAgent()` construction. Policy metadata will be passed to runtime middleware/guards for real enforcement.
+Agent construction is available through the optional `type-chain/agent` and `type-chain/typemcp` subpaths. The next layer is application-supplied runtime middleware or guards that make policy metadata enforceable.
 
 ## Non-goals
 

@@ -5,6 +5,8 @@ const required = [
   "dist/index.d.ts",
   "dist/langchain.js",
   "dist/langchain.d.ts",
+  "dist/agent.js",
+  "dist/agent.d.ts",
   "dist/typemcp.js",
   "dist/typemcp.d.ts",
   "README.md",
@@ -23,6 +25,14 @@ if (
   throw new Error(
     "Package contract is missing the type-chain/langchain export.",
   );
+}
+
+const agentExport = packageJson.exports?.["./agent"];
+if (
+  agentExport?.types !== "./dist/agent.d.ts" ||
+  agentExport?.import !== "./dist/agent.js"
+) {
+  throw new Error("Package contract is missing the type-chain/agent export.");
 }
 
 const bridgeExport = packageJson.exports?.["./typemcp"];

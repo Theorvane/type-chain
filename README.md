@@ -2,7 +2,7 @@
 
 > A decorator-first, type-safe authoring layer for LangChain JS tools and agents.
 
-> **Status:** private, manual-governance implementation. TypeChain is not published and does not yet provide agent construction or runtime policy enforcement. GitHub Free cannot enforce branch rulesets for this private repository; maintainers must apply the documented manual merge gates until the project is mature enough to become public.
+> **Status:** private, manual-governance implementation. TypeChain is not published. Decorated tool adaptation, the optional `type-chain/agent` builder, and the optional in-process `type-chain/typemcp` bridge are implemented on the development branch; runtime policy enforcement remains application-owned. GitHub Free cannot enforce branch rulesets for this private repository; maintainers must apply the documented manual merge gates until the project is mature enough to become public.
 
 TypeChain will make LangChain JS agent and tool definitions easier to author without hiding their runtime contracts. It will use explicit runtime schemas, observable adapters, and policy-aware tools—not magic type inference.
 
@@ -43,13 +43,21 @@ npm run verify
 npm run verify:publish
 ```
 
-The development branch exposes a metadata registry and a LangChain Core adapter. It does not yet construct agents or enforce runtime policy. For example:
+The development branch exposes a metadata registry, a LangChain Core tool adapter, and a thin agent builder over LangChain `createAgent()`. It does not enforce approval, authorization, timeout, retry, or audit policies. Install the optional runtime dependencies—and the provider integration used by the example—in the application:
+
+```bash
+npm install type-chain @langchain/core langchain @langchain/openai zod
+```
+
+Set `OPENAI_API_KEY` before invoking the OpenAI model. For example:
 
 ```ts
 import { Tool } from "type-chain";
-import { toLangChainTools } from "type-chain/langchain";
+import { Agent, buildAgent } from "type-chain/agent";
+import { initChatModel } from "langchain";
 import { z } from "zod";
 
+@Agent({ systemPrompt: "Use the issue search tool when useful." })
 class IssueTools {
   prefix = "issue:";
 
@@ -63,11 +71,14 @@ class IssueTools {
   }
 }
 
-const [searchIssues] = toLangChainTools(new IssueTools());
-await searchIssues.invoke({ query: "TypeChain" });
+const model = await initChatModel("openai:gpt-4.1-mini");
+const agent = buildAgent(new IssueTools(), { model });
+await agent.invoke({
+  messages: [{ role: "user", content: "Find TypeChain issues." }],
+});
 ```
 
-The adapter delegates schema parsing and validation to LangChain Core; it intentionally does not build an agent or enforce approval, authorization, timeout, retry, or audit policies.
+`buildAgent()` delegates agent construction to LangChain's `createAgent()` and the tool adapter delegates schema parsing and validation to LangChain Core. Import `type-chain/agent` only in applications that install the optional `langchain` and `@langchain/core` peers. TypeChain intentionally does not enforce approval, authorization, timeout, retry, or audit policies.
 
 `schema` must be an explicit structured-object runtime schema supported by the installed `@langchain/core` version: for example, a Zod object (including an object wrapped by a refinement or transform) or JSON Schema with `type: "object"`. Primitive schemas are rejected by `toLangChainTools()` because LangChain's dynamic-tool fallback does not preserve their validation semantics. TypeChain passes supported schemas through unchanged; LangChain Core owns parsing and validation. See [architecture](docs/architecture.md), [release guide](docs/release.md), and [contributing guide](CONTRIBUTING.md).
 
@@ -78,7 +89,7 @@ When an external API needs a reusable MCP-shaped tool contract but the LangChain
 Install the optional peer dependencies in the application that imports this subpath:
 
 ```bash
-npm install type-chain @theorvane/type-mcp @langchain/core langchain zod
+npm install type-chain @theorvane/type-mcp @langchain/core langchain @langchain/openai zod
 ```
 
 ```ts
