@@ -77,6 +77,42 @@ test("rejects missing schemas and non-portable tool names at declaration time", 
   );
 });
 
+test("snapshots validated options before instance initialization", () => {
+  class Searcher {
+    search() {}
+  }
+  const options = {
+    name: "search_issues",
+    description: "Search repository issues.",
+    schema: { type: "object" },
+  };
+  const initializers = [];
+  const decorator = Tool(options);
+
+  decorator(Searcher.prototype.search, {
+    kind: "method",
+    name: "search",
+    static: false,
+    private: false,
+    addInitializer(initializer) {
+      initializers.push(initializer);
+    },
+  });
+  options.name = "Not portable";
+  options.description = "   ";
+  options.schema = null;
+
+  const instance = new Searcher();
+  for (const initializer of initializers) {
+    initializer.call(instance);
+  }
+
+  const [definition] = getToolDefinitions(instance);
+  assert.equal(definition?.name, "search_issues");
+  assert.equal(definition?.description, "Search repository issues.");
+  assert.deepEqual(definition?.schema, { type: "object" });
+});
+
 test("rejects static, private, and non-method declarations", () => {
   const method = () => undefined;
   const options = { name: "lookup", description: "Lookup.", schema: {} };

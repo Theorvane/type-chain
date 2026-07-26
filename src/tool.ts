@@ -28,6 +28,7 @@ const portableToolName = /^[a-z][a-z0-9_]*$/;
 
 export function Tool(options: ToolOptions) {
   validateToolOptions(options);
+  const snapshot = Object.freeze({ ...options });
 
   return function registerTool<
     This extends object,
@@ -58,15 +59,15 @@ export function Tool(options: ToolOptions) {
 
       if (
         registrations.some(
-          (registration) => registration.options.name === options.name,
+          (registration) => registration.options.name === snapshot.name,
         )
       ) {
-        throw new Error(`Duplicate tool name registered: ${options.name}`);
+        throw new Error(`Duplicate tool name registered: ${snapshot.name}`);
       }
 
       methods.add(context.name);
       registrations.push({
-        options: Object.freeze({ ...options }),
+        options: snapshot,
         invoke: (instance, input) => Reflect.apply(value, instance, [input]),
       });
       registeredMethods.set(owner, methods);
