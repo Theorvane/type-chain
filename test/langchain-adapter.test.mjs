@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { z } from "zod";
+import { z as z3 } from "zod-v3";
 import { Tool, toLangChainTools } from "../dist/index.js";
 
 function applyMethodDecorator(instance, methodName, options) {
@@ -43,6 +44,28 @@ test("rejects schemas that do not describe structured object input", () => {
     () => toLangChainTools(instance),
     /structured object input schema/i,
   );
+});
+
+test("accepts and validates structured Zod v3 input schemas", async () => {
+  const schema = z3.object({ query: z3.string().min(1) });
+  class SearchTools {
+    search({ query }) {
+      return `zod-v3:${query}`;
+    }
+  }
+
+  const instance = new SearchTools();
+  applyMethodDecorator(instance, "search", {
+    name: "search_v3_issues",
+    description: "Search issues with a Zod v3 schema.",
+    schema,
+  });
+
+  const [searchIssues] = toLangChainTools(instance);
+
+  assert.equal(searchIssues.schema, schema);
+  assert.equal(await searchIssues.invoke({ query: "42" }), "zod-v3:42");
+  await assert.rejects(() => searchIssues.invoke({ query: "" }));
 });
 
 test("adapts decorated methods into invocable LangChain structured tools", async () => {

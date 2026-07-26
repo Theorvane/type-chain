@@ -3,7 +3,7 @@ import { type StructuredToolInterface, tool } from "@langchain/core/tools";
 import { getToolDefinitions } from "./tool.js";
 
 type StructuredInputSchema = object & {
-  readonly _def?: { readonly type?: unknown };
+  readonly _def?: { readonly type?: unknown; readonly typeName?: unknown };
   readonly _zod?: { readonly def?: { readonly type?: unknown } };
   readonly type?: unknown;
 };
@@ -34,6 +34,7 @@ function isStructuredInputSchema(
   return (
     candidate.type === "object" ||
     candidate._def?.type === "object" ||
+    candidate._def?.typeName === "ZodObject" ||
     candidate._zod?.def?.type === "object"
   );
 }
