@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/assets/type-chain-hero.png" alt="TypeChain orchestration diagram connecting typed application code through TypeChain and LangChain to models, tools, retrievers, memory, and chains" width="100%" />
+</p>
+
 # TypeChain
 
 > A decorator-first, type-safe authoring layer for LangChain JS tools and agents.
