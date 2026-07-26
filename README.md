@@ -43,7 +43,26 @@ npm run verify
 npm run verify:publish
 ```
 
-The current source and test files are build-pipeline sentinels, not product implementation. See [architecture](docs/architecture.md), [release guide](docs/release.md), and [contributing guide](CONTRIBUTING.md).
+The development branch currently exposes only a metadata registry; it is not yet a LangChain adapter. For example:
+
+```ts
+import { getToolDefinitions, Tool } from "type-chain";
+
+class IssueTools {
+  @Tool({
+    name: "search_issues",
+    description: "Search repository issues.",
+    schema: { type: "object" },
+  })
+  async searchIssues(input: unknown) {
+    return input;
+  }
+}
+
+const definitions = getToolDefinitions(new IssueTools());
+```
+
+`schema` must be an explicit non-null runtime object (such as a future supported Zod or JSON Schema value); TypeChain does not parse it yet. See [architecture](docs/architecture.md), [release guide](docs/release.md), and [contributing guide](CONTRIBUTING.md).
 
 ## Community
 

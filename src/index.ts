@@ -1,2 +1,2 @@
-/** TypeChain public entry point. Product APIs are intentionally not implemented yet. */
-export {};
+export type { ToolDefinition, ToolOptions } from "./tool.js";
+export { getToolDefinitions, Tool } from "./tool.js";

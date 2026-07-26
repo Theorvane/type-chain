@@ -2,11 +2,15 @@
 
 ## Status
 
-This is a design boundary, not an implementation claim. No decorator, tool adapter, agent builder, or LangChain integration is shipped.
+The metadata registry is shipped on the development branch. LangChain adapters, agent builders, schema execution, and runtime policy enforcement are not shipped.
+
+## Current implementation
+
+The development branch provides the first primitive: `@Tool()` records explicit name, description, and runtime-schema metadata for a public instance method; `getToolDefinitions(instance)` returns immutable, receiver-bound definitions. This is metadata-only: it does not parse schemas, call LangChain `tool()`, construct agents, or enforce any policy.
 
 ## Intended scope
 
-TypeChain will record decorated method metadata, bind it to a dependency-injected instance, adapt the bound method to LangChain `tool()` using an explicit runtime schema, and collect tools for explicit `createAgent()` construction. Policy metadata is passed to runtime middleware/guards for real enforcement.
+The next layer will adapt these instance-bound definitions to LangChain `tool()` and collect them for explicit `createAgent()` construction. Policy metadata will be passed to runtime middleware/guards for real enforcement.
 
 ## Non-goals
 
