@@ -1,0 +1,17 @@
+name: Feature request
+description: Propose a focused, safe capability.
+title: "feat: "
+labels: ["enhancement", "triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes: {label: Problem to solve}
+    validations: {required: true}
+  - type: textarea
+    id: proposal
+    attributes: {label: Proposed API and runtime behavior}
+    validations: {required: true}
+  - type: textarea
+    id: safety
+    attributes: {label: Safety and compatibility impact}
+    validations: {required: true}

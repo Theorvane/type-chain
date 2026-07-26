@@ -1,0 +1,60 @@
+{
+  "name": "type-chain",
+  "version": "0.0.0-development",
+  "description": "Decorator-first, type-safe authoring layer for LangChain JS tools and agents.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.build.json",
+    "lint": "biome check .",
+    "format:check": "biome format .",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test",
+    "verify": "npm run lint && npm run typecheck && npm run test && npm run build && npm run verify:package",
+    "verify:package": "node scripts/verify-package.mjs",
+    "verify:publish": "npm run verify && npm pack --dry-run --json --ignore-scripts",
+    "prepublishOnly": "node scripts/assert-release-readiness.mjs && npm run verify:publish"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Theorvane/type-chain.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Theorvane/type-chain/issues"
+  },
+  "homepage": "https://github.com/Theorvane/type-chain#readme",
+  "keywords": [
+    "langchain",
+    "langchainjs",
+    "typescript",
+    "decorators",
+    "agents",
+    "tools"
+  ],
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.5",
+    "typescript": "^5.9.3"
+  }
+}
