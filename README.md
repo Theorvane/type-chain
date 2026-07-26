@@ -1,59 +1,64 @@
-<p align="center">
+<div align="center">
   <img src="docs/assets/type-chain-hero.png" alt="TypeChain orchestration diagram connecting typed application code through TypeChain and LangChain to models, tools, retrievers, memory, and chains" width="100%" />
-</p>
 
-# TypeChain
+  <h1>TypeChain</h1>
 
-> A decorator-first, type-safe authoring layer for LangChain JS tools and agents.
+  **Decorator-first, type-safe authoring for LangChain JS tools and agents.**
 
-> **Status:** private, manual-governance implementation. TypeChain is not published. Decorated tool adaptation, the optional `type-chain/agent` builder, and the optional in-process `type-chain/typemcp` bridge are implemented on the development branch; runtime policy enforcement remains application-owned. GitHub Free cannot enforce branch rulesets for this private repository; maintainers must apply the documented manual merge gates until the project is mature enough to become public.
+  [![Node](https://img.shields.io/badge/node-%E2%89%A520-339933?style=flat-square)](package.json)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-Stage%203%20decorators-3178C6?style=flat-square)](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-0.html)
+  [![LangChain](https://img.shields.io/badge/LangChain-JS%20composition-1C3C3C?style=flat-square)](https://js.langchain.com/)
+  [![License](https://img.shields.io/badge/license-MIT-111827?style=flat-square)](LICENSE)
+</div>
 
-TypeChain will make LangChain JS agent and tool definitions easier to author without hiding their runtime contracts. It will use explicit runtime schemas, observable adapters, and policy-aware tools—not magic type inference.
+> **Unreleased development branch:** TypeChain is private and has **no npm publication**. The implemented surfaces below are available from this repository's `dev` branch only; package ownership and release authorization have not been established.
+>
+> **Runtime boundary:** TypeChain records declarations and composes standard LangChain tools and agents. Model selection, credentials, authorization, approvals, retries, timeouts, persistence, redaction, and audit policy remain application responsibilities.
 
-```ts
-// Target API only — not implemented or published yet.
-class ResearchAgent {
-  // @Tool({ name: "search_issues", schema: SearchIssuesInput })
-  async searchIssues(input: unknown) { return input; }
+TypeChain keeps explicit runtime schemas and LangChain contracts visible while making TypeScript tool and agent declarations easier to author. It supports standard (Stage 3) decorators—without legacy reflection metadata—and delegates execution semantics to LangChain and, when used, TypeMCP.
+
+## Fast path
+
+1. Clone this repository and work from the `dev` branch; do not install `type-chain` from npm because it is not published.
+2. Use `@Tool()` plus an explicit object runtime schema to declare an instance method.
+3. Import `toLangChainTools()` from `type-chain/langchain` to create standard LangChain tools.
+4. Import `@Agent()` and `buildAgent()` from `type-chain/agent` when the application owns a LangChain model and agent lifecycle.
+5. Use `type-chain/typemcp` only for in-process composition of a TypeMCP-decorated server; it does not open an MCP transport.
+
+## Development setup
+
+TypeChain requires **Node.js 20 or later**, ESM-aware TypeScript configuration, and standard TypeScript decorators. The repository currently provides the unreleased development package through its local workspace.
+
+```bash
+git clone https://github.com/Theorvane/type-chain.git
+cd type-chain
+git switch dev
+npm ci
+npm run verify
+```
+
+For a consuming TypeScript application, use a Node-aware compiler configuration and do **not** enable TypeScript's legacy `experimentalDecorators` mode for these examples:
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2022", "ESNext.Decorators"],
+    "strict": true,
+    "verbatimModuleSyntax": true
+  }
 }
 ```
 
-## Design principles
+## Define a tool and build an agent
 
-- **Schemas are explicit.** Tool inputs use explicit Zod or JSON Schema runtime contracts.
-- **LangChain remains visible.** Decorators adapt to standard LangChain tools, agents, and runtime context.
-- **Policies run at runtime.** Approval, authorization, retry, timeout, and audit metadata must be enforced by guards or middleware.
-- **Standard decorators first.** New code targets modern TypeScript decorators and avoids mandatory legacy reflection metadata.
-- **Safe by default.** Side-effecting tools need an explicit approval and audit design.
-
-## Planned package
-
-- npm: `type-chain`
-- Repository: `https://github.com/Theorvane/type-chain`
-- Intended npm visibility: public after release readiness
-- Current state: the npm name is currently available, but ownership and publication authorization are not established.
-
-## Workflow
-
-`dev` is the default integration branch. `main` is release-only and accepts promotion PRs from `dev` only. Until the repository becomes public, maintainers manually enforce the issue → feature branch → PR → current-HEAD review + CI flow and must not direct-push either lane.
-
-Agent instructions are authoritative only in [`.agents/`](.agents/); this repository intentionally has no `.github/agents/` directory.
-
-## Development baseline
+Install the optional runtime packages in the application that consumes the development package. This example uses OpenAI, so it also needs `@langchain/openai` and `OPENAI_API_KEY`.
 
 ```bash
-npm ci
-npm run verify
-npm run verify:publish
+npm install @langchain/core langchain @langchain/openai zod
 ```
-
-The development branch exposes a metadata registry, a LangChain Core tool adapter, and a thin agent builder over LangChain `createAgent()`. It does not enforce approval, authorization, timeout, retry, or audit policies. Install the optional runtime dependencies—and the provider integration used by the example—in the application:
-
-```bash
-npm install type-chain @langchain/core langchain @langchain/openai zod
-```
-
-Set `OPENAI_API_KEY` before invoking the OpenAI model. For example:
 
 ```ts
 import { Tool } from "type-chain";
@@ -61,39 +66,62 @@ import { Agent, buildAgent } from "type-chain/agent";
 import { initChatModel } from "langchain";
 import { z } from "zod";
 
-@Agent({ systemPrompt: "Use the issue search tool when useful." })
+@Agent({ systemPrompt: "Use the available issue-search tool when helpful." })
 class IssueTools {
-  prefix = "issue:";
-
   @Tool({
     name: "search_issues",
-    description: "Search repository issues.",
+    description: "Search repository issues by query.",
     schema: z.object({ query: z.string().min(1) }),
   })
-  async searchIssues(input: { query: string }) {
-    return `${this.prefix}${input.query}`;
+  async searchIssues({ query }: { readonly query: string }) {
+    return { query, source: "application-owned issue client" };
   }
 }
 
 const model = await initChatModel("openai:gpt-4.1-mini");
 const agent = buildAgent(new IssueTools(), { model });
+
 await agent.invoke({
   messages: [{ role: "user", content: "Find TypeChain issues." }],
 });
 ```
 
-`buildAgent()` delegates agent construction to LangChain's `createAgent()` and the tool adapter delegates schema parsing and validation to LangChain Core. Import `type-chain/agent` only in applications that install the optional `langchain` and `@langchain/core` peers. TypeChain intentionally does not enforce approval, authorization, timeout, retry, or audit policies.
+`buildAgent()` delegates to LangChain's `createAgent()`. `@Tool()` metadata is adapted through LangChain Core, which owns supported-schema parsing and validation.
 
-`schema` must be an explicit structured-object runtime schema supported by the installed `@langchain/core` version: for example, a Zod object (including an object wrapped by a refinement or transform) or JSON Schema with `type: "object"`. Primitive schemas are rejected by `toLangChainTools()` because LangChain's dynamic-tool fallback does not preserve their validation semantics. TypeChain passes supported schemas through unchanged; LangChain Core owns parsing and validation. See [architecture](docs/architecture.md), [release guide](docs/release.md), and [contributing guide](CONTRIBUTING.md).
+## Capability map
+
+| Surface | Development branch status | What it does |
+| --- | --- | --- |
+| `@Tool()` / `getToolDefinitions()` | Implemented | Records explicit tool metadata and returns immutable, receiver-bound definitions for public instance methods. |
+| `type-chain/langchain` / `toLangChainTools()` | Implemented | Converts decorated tools into standard LangChain structured tools. |
+| `type-chain/agent` / `@Agent()` / `buildAgent()` | Implemented | Adds class-level prompt metadata and delegates decorated-tool agent construction to LangChain `createAgent()`. |
+| `type-chain/typemcp` / `createTypeMcpLangChainTools()` | Implemented | Converts a TypeMCP-decorated server into LangChain tools in the current Node.js process. |
+| `type-chain/typemcp` / `createTypeMcpAgent()` | Implemented | Resolves TypeMCP tools, then delegates agent construction to LangChain. |
+| HTTP or stdio MCP hosting | Not provided | Use TypeMCP's transport hosts when an MCP server must communicate across processes. |
+| Runtime policy enforcement | Not provided | The application must enforce authorization, approval, retries, timeouts, audit, redaction, and persistence. |
+| npm distribution | Not published | This repository is private and its package name is not currently available on npm. |
+
+### Schema contract
+
+`@Tool()` accepts an explicit, non-null runtime schema object. For `toLangChainTools()`, the schema must describe a **structured object input**: for example, a Zod object (including an object wrapped by a refinement or transform) or JSON Schema with `type: "object"`.
+
+Primitive schemas are intentionally rejected by the LangChain adapter because the dynamic-tool fallback would not preserve their validation semantics. TypeChain passes accepted schemas through; LangChain Core owns parsing and validation.
 
 ## In-process TypeMCP composition
 
-When an external API needs a reusable MCP-shaped tool contract but the LangChain agent runs in the same Node.js process, import the optional `type-chain/typemcp` subpath. It delegates tool conversion to TypeMCP's `createLangChainTools()` and passes the resulting standard LangChain tools to `createAgent()`; it does **not** start an HTTP or stdio MCP transport.
+Use the optional `type-chain/typemcp` subpath when an external API is wrapped as a TypeMCP tool and the LangChain agent runs in the **same Node.js process**:
 
-Install the optional peer dependencies in the application that imports this subpath:
+```text
+external API client → TypeMCP-decorated tool + explicit resolver
+                    → TypeMCP createLangChainTools()
+                    → TypeChain createTypeMcpAgent()
+                    → LangChain createAgent()
+```
+
+Install the optional TypeMCP and LangChain packages in the application:
 
 ```bash
-npm install type-chain @theorvane/type-mcp @langchain/core langchain @langchain/openai zod
+npm install @theorvane/type-mcp @langchain/core langchain @langchain/openai zod
 ```
 
 ```ts
@@ -107,14 +135,16 @@ interface CatalogClient {
 }
 
 declare const catalogClient: CatalogClient;
-const model = await initChatModel("openai:gpt-4.1-mini");
 
 @McpServer({ name: "catalog_api", version: "1.0.0" })
 class CatalogApiTools {
   private readonly client: CatalogClient;
 
   constructor(client: unknown) {
-    if (!isCatalogClient(client)) throw new TypeError("Catalog client is required.");
+    if (!isCatalogClient(client)) {
+      throw new TypeError("CatalogApiTools requires a catalog client.");
+    }
+
     this.client = client;
   }
 
@@ -137,6 +167,7 @@ function isCatalogClient(value: unknown): value is CatalogClient {
   );
 }
 
+const model = await initChatModel("openai:gpt-4.1-mini");
 const agent = await createTypeMcpAgent({
   model,
   server: CatalogApiTools,
@@ -144,8 +175,28 @@ const agent = await createTypeMcpAgent({
 });
 ```
 
-`createTypeMcpLangChainTools()` is available when an application wants to combine TypeMCP-provided tools with other LangChain tools itself. The application owns API credentials, timeouts, retries, authorization, approval, audit logging, and error/redaction policy. Use TypeMCP's HTTP or stdio hosts separately when a tool server must serve a different process or an external MCP client.
+TypeMCP owns its declaration validation, metadata interpretation, and resolver behavior. TypeChain does not create an HTTP/stdio transport or an MCP client/session lifecycle. The application owns the API client, credentials, authorization, approval, retries, timeouts, audit logging, and error/redaction policy.
 
+## Architecture and boundaries
+
+- [Architecture overview](docs/architecture.md) — public surfaces, composition boundaries, and non-goals.
+- [Release guide](docs/release.md) — development versus release readiness and publication checks.
+- [Contributing](CONTRIBUTING.md) — issue-first contribution and verification workflow.
+- [Agent instructions](.agents/README.md) — repository-local guidance for coding agents.
+
+`dev` is the default integration branch. `main` is release-only and accepts promotion PRs from the canonical `dev` branch. Until the repository becomes public, maintainers enforce the issue → issue-numbered branch → PR → current-HEAD review + CI → squash merge process manually; neither protected lane accepts direct pushes.
+
+## Verify locally
+
+```bash
+npm ci
+npm run lint
+npm run typecheck
+npm run test
+npm run build
+npm run verify:package
+npm run verify:publish
+```
 
 ## Community
 
