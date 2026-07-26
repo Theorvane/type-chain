@@ -1,6 +1,6 @@
 # Contributing to TypeChain
 
-TypeChain is private while its initial contracts are established, but is designed to become an open-source npm package.
+TypeChain is temporarily public while its initial contracts, branch governance, and CI are established. Before opening the first implementation PR, a maintainer must switch the repository to private. It is designed to become an open-source npm package after its release criteria are met.
 
 ## Required workflow
 

@@ -2,7 +2,7 @@
 
 > A decorator-first, type-safe authoring layer for LangChain JS tools and agents.
 
-> **Status:** private pre-implementation. TypeChain is not a usable LangChain integration and no npm package has been released.
+> **Status:** public policy-bootstrap phase. TypeChain is not a usable LangChain integration and no npm package has been released. The repository must be changed to private immediately before the first implementation PR is opened.
 
 TypeChain will make LangChain JS agent and tool definitions easier to author without hiding their runtime contracts. It will use explicit runtime schemas, observable adapters, and policy-aware tools—not magic type inference.
 

@@ -1,6 +1,6 @@
 # npm Release Guide
 
-`type-chain` is not published. A private GitHub repository may later publish a public npm package, but repository and registry visibility are separate.
+`type-chain` is not published. The repository is temporarily public for policy bootstrap and must be switched to private before the first implementation PR. A private GitHub repository may later publish a public npm package; repository and registry visibility are separate.
 
 ## First-release prerequisites
 
