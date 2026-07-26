@@ -15,6 +15,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./typemcp": {
+      "types": "./dist/typemcp.d.ts",
+      "import": "./dist/typemcp.js",
+      "default": "./dist/typemcp.js"
     }
   },
   "types": "./dist/index.d.ts",
@@ -54,8 +59,28 @@
     "agents",
     "tools"
   ],
+  "peerDependencies": {
+    "@langchain/core": "^1.2.3",
+    "@theorvane/type-mcp": "^0.2.0",
+    "langchain": "^1.5.4"
+  },
+  "peerDependenciesMeta": {
+    "@langchain/core": {
+      "optional": true
+    },
+    "@theorvane/type-mcp": {
+      "optional": true
+    },
+    "langchain": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@biomejs/biome": "^2.5.5",
-    "typescript": "^5.9.3"
+    "@langchain/core": "1.2.3",
+    "@theorvane/type-mcp": "0.2.0",
+    "langchain": "1.5.4",
+    "typescript": "^5.9.3",
+    "zod": "^4.4.3"
   }
 }

@@ -64,6 +64,67 @@ const definitions = getToolDefinitions(new IssueTools());
 
 `schema` must be an explicit non-null runtime object (such as a future supported Zod or JSON Schema value); TypeChain does not parse it yet. See [architecture](docs/architecture.md), [release guide](docs/release.md), and [contributing guide](CONTRIBUTING.md).
 
+## In-process TypeMCP composition
+
+When an external API needs a reusable MCP-shaped tool contract but the LangChain agent runs in the same Node.js process, import the optional `type-chain/typemcp` subpath. It delegates tool conversion to TypeMCP's `createLangChainTools()` and passes the resulting standard LangChain tools to `createAgent()`; it does **not** start an HTTP or stdio MCP transport.
+
+Install the optional peer dependencies in the application that imports this subpath:
+
+```bash
+npm install type-chain @theorvane/type-mcp @langchain/core langchain zod
+```
+
+```ts
+import { McpServer, McpTool } from "@theorvane/type-mcp";
+import { createTypeMcpAgent } from "type-chain/typemcp";
+import { initChatModel } from "langchain";
+import { z } from "zod";
+
+interface CatalogClient {
+  findProduct(sku: string): Promise<unknown>;
+}
+
+declare const catalogClient: CatalogClient;
+const model = await initChatModel("openai:gpt-4.1-mini");
+
+@McpServer({ name: "catalog_api", version: "1.0.0" })
+class CatalogApiTools {
+  private readonly client: CatalogClient;
+
+  constructor(client: unknown) {
+    if (!isCatalogClient(client)) throw new TypeError("Catalog client is required.");
+    this.client = client;
+  }
+
+  @McpTool({
+    name: "find_product",
+    description: "Find a product through the catalog API.",
+    input: z.object({ sku: z.string().min(1) }),
+  })
+  async findProduct({ sku }: { readonly sku: string }) {
+    return this.client.findProduct(sku);
+  }
+}
+
+function isCatalogClient(value: unknown): value is CatalogClient {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "findProduct" in value &&
+    typeof value.findProduct === "function"
+  );
+}
+
+const agent = await createTypeMcpAgent({
+  model,
+  server: CatalogApiTools,
+  resolver: { resolve: () => new CatalogApiTools(catalogClient) },
+});
+```
+
+`createTypeMcpLangChainTools()` is available when an application wants to combine TypeMCP-provided tools with other LangChain tools itself. The application owns API credentials, timeouts, retries, authorization, approval, audit logging, and error/redaction policy. Use TypeMCP's HTTP or stdio hosts separately when a tool server must serve a different process or an external MCP client.
+
+
 ## Community
 
 [Code of Conduct](CODE_OF_CONDUCT.md) · [Security](SECURITY.md) · [Support](SUPPORT.md) · [Governance](GOVERNANCE.md) · [MIT License](LICENSE)
