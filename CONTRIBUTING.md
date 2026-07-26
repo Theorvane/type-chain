@@ -1,6 +1,6 @@
 # Contributing to TypeChain
 
-TypeChain is temporarily public while its initial contracts, branch governance, and CI are established. Before opening the first implementation PR, a maintainer must switch the repository to private. It is designed to become an open-source npm package after its release criteria are met.
+TypeChain is private while its initial contracts are established. GitHub Free cannot enforce Rulesets or branch protection for this private repository, so maintainers must manually enforce the workflow below. The repository will become public only after the implementation and npm release-readiness criteria in `docs/release.md` are satisfied and GitHub rulesets can be restored and verified.
 
 ## Required workflow
 
@@ -10,7 +10,8 @@ TypeChain is temporarily public while its initial contracts, branch governance, 
 4. Open one focused PR to `dev` with `Closes #<issue-number>`.
 5. Run `npm run verify`, `npm run verify:publish`, and `git diff --check` before requesting review.
 6. Merge only after CI, resolved review threads, and independent review of the exact current head.
-7. Promote `dev` to `main` only through a dedicated release PR.
+7. Do not direct-push or merge `dev`/`main`. A maintainer must manually confirm the issue scope, exact PR HEAD, green CI, resolved threads, and independent review before merging.
+8. Promote `dev` to `main` only through a dedicated release PR.
 
 ## Tool and decorator contracts
 

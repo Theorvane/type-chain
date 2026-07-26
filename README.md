@@ -2,7 +2,7 @@
 
 > A decorator-first, type-safe authoring layer for LangChain JS tools and agents.
 
-> **Status:** public policy-bootstrap phase. TypeChain is not a usable LangChain integration and no npm package has been released. The repository must be changed to private immediately before the first implementation PR is opened.
+> **Status:** private, manual-governance pre-implementation. TypeChain is not a usable LangChain integration and no npm package has been released. GitHub Free cannot enforce branch rulesets for this private repository; maintainers must apply the documented manual merge gates until the project is mature enough to become public.
 
 TypeChain will make LangChain JS agent and tool definitions easier to author without hiding their runtime contracts. It will use explicit runtime schemas, observable adapters, and policy-aware tools—not magic type inference.
 
@@ -31,7 +31,7 @@ class ResearchAgent {
 
 ## Workflow
 
-`dev` is the protected default integration branch. `main` is release-only and accepts promotion PRs from `dev` only. Contributions use an issue → feature branch → PR → current-HEAD review + CI flow.
+`dev` is the default integration branch. `main` is release-only and accepts promotion PRs from `dev` only. Until the repository becomes public, maintainers manually enforce the issue → feature branch → PR → current-HEAD review + CI flow and must not direct-push either lane.
 
 Agent instructions are authoritative only in [`.agents/`](.agents/); this repository intentionally has no `.github/agents/` directory.
 
