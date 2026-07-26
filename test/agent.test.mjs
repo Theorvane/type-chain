@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { FakeToolCallingModel } from "langchain";
 import { z } from "zod";
-import { Agent, buildAgent, Tool } from "../dist/index.js";
+import { Agent, buildAgent } from "../dist/agent.js";
+import { Tool } from "../dist/index.js";
 
 function applyMethodDecorator(instance, methodName, options) {
   const initializers = [];

@@ -1,4 +1,5 @@
-import { Agent, getToolDefinitions, Tool } from "../src/index.js";
+import { Agent } from "../src/agent.js";
+import { getToolDefinitions, Tool } from "../src/index.js";
 
 export function createDecoratedFixture() {
   const schema = { type: "object" };

@@ -43,13 +43,15 @@ npm run verify
 npm run verify:publish
 ```
 
-The development branch exposes a metadata registry and a LangChain Core adapter. It does not yet construct agents or enforce runtime policy. For example:
+The development branch exposes a metadata registry, a LangChain Core tool adapter, and a thin agent builder over LangChain `createAgent()`. It does not enforce approval, authorization, timeout, retry, or audit policies. For example:
 
 ```ts
 import { Tool } from "type-chain";
-import { toLangChainTools } from "type-chain/langchain";
+import { Agent, buildAgent } from "type-chain/agent";
+import { initChatModel } from "langchain";
 import { z } from "zod";
 
+@Agent({ systemPrompt: "Use the issue search tool when useful." })
 class IssueTools {
   prefix = "issue:";
 
@@ -63,11 +65,14 @@ class IssueTools {
   }
 }
 
-const [searchIssues] = toLangChainTools(new IssueTools());
-await searchIssues.invoke({ query: "TypeChain" });
+const model = await initChatModel("openai:gpt-4.1-mini");
+const agent = buildAgent(new IssueTools(), { model });
+await agent.invoke({
+  messages: [{ role: "user", content: "Find TypeChain issues." }],
+});
 ```
 
-The adapter delegates schema parsing and validation to LangChain Core; it intentionally does not build an agent or enforce approval, authorization, timeout, retry, or audit policies.
+`buildAgent()` delegates agent construction to LangChain's `createAgent()` and the tool adapter delegates schema parsing and validation to LangChain Core. Import `type-chain/agent` only in applications that install the optional `langchain` and `@langchain/core` peers. TypeChain intentionally does not enforce approval, authorization, timeout, retry, or audit policies.
 
 `schema` must be an explicit structured-object runtime schema supported by the installed `@langchain/core` version: for example, a Zod object (including an object wrapped by a refinement or transform) or JSON Schema with `type: "object"`. Primitive schemas are rejected by `toLangChainTools()` because LangChain's dynamic-tool fallback does not preserve their validation semantics. TypeChain passes supported schemas through unchanged; LangChain Core owns parsing and validation. See [architecture](docs/architecture.md), [release guide](docs/release.md), and [contributing guide](CONTRIBUTING.md).
 

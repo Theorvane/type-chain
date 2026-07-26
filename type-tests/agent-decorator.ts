@@ -1,6 +1,6 @@
 import { FakeToolCallingModel } from "langchain";
-
-import { Agent, buildAgent, Tool } from "../src/index.js";
+import { Agent, buildAgent } from "../src/agent.js";
+import { Tool } from "../src/index.js";
 
 const schema = { type: "object" };
 

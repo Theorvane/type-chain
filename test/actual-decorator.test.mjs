@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { FakeToolCallingModel } from "langchain";
-import { buildAgent } from "../.test-dist/src/index.js";
+import { buildAgent } from "../.test-dist/src/agent.js";
 import { createDecoratedFixture } from "../.test-dist/test-fixtures/actual-decorator.fixture.js";
 
 test("collects metadata registered by actual standard TypeScript decorators", async () => {

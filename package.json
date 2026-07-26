@@ -21,6 +21,11 @@
       "import": "./dist/langchain.js",
       "default": "./dist/langchain.js"
     },
+    "./agent": {
+      "types": "./dist/agent.d.ts",
+      "import": "./dist/agent.js",
+      "default": "./dist/agent.js"
+    },
     "./typemcp": {
       "types": "./dist/typemcp.d.ts",
       "import": "./dist/typemcp.js",
