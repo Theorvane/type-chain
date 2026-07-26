@@ -16,6 +16,11 @@
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
+    "./langchain": {
+      "types": "./dist/langchain.d.ts",
+      "import": "./dist/langchain.js",
+      "default": "./dist/langchain.js"
+    },
     "./typemcp": {
       "types": "./dist/typemcp.d.ts",
       "import": "./dist/typemcp.js",
