@@ -46,7 +46,8 @@ npm run verify:publish
 The development branch exposes a metadata registry and a LangChain Core adapter. It does not yet construct agents or enforce runtime policy. For example:
 
 ```ts
-import { toLangChainTools, Tool } from "type-chain";
+import { Tool } from "type-chain";
+import { toLangChainTools } from "type-chain/langchain";
 import { z } from "zod";
 
 class IssueTools {

@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { z } from "zod";
 import { z as z3 } from "zod-v3";
-import { Tool, toLangChainTools } from "../dist/index.js";
+import { Tool } from "../dist/index.js";
+import { toLangChainTools } from "../dist/langchain.js";
 
 function applyMethodDecorator(instance, methodName, options) {
   const initializers = [];
