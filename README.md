@@ -138,7 +138,15 @@ declare const catalogClient: CatalogClient;
 
 @McpServer({ name: "catalog_api", version: "1.0.0" })
 class CatalogApiTools {
-  constructor(private readonly client: CatalogClient) {}
+  private readonly client: CatalogClient;
+
+  constructor(client: unknown) {
+    if (!isCatalogClient(client)) {
+      throw new TypeError("CatalogApiTools requires a catalog client.");
+    }
+
+    this.client = client;
+  }
 
   @McpTool({
     name: "find_product",
@@ -148,6 +156,15 @@ class CatalogApiTools {
   async findProduct({ sku }: { readonly sku: string }) {
     return this.client.findProduct(sku);
   }
+}
+
+function isCatalogClient(value: unknown): value is CatalogClient {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "findProduct" in value &&
+    typeof value.findProduct === "function"
+  );
 }
 
 const model = await initChatModel("openai:gpt-4.1-mini");
