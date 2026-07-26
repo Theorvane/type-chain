@@ -2,7 +2,7 @@
 
 > A decorator-first, type-safe authoring layer for LangChain JS tools and agents.
 
-> **Status:** private, manual-governance implementation. TypeChain is not published and does not yet provide agent construction or runtime policy enforcement. GitHub Free cannot enforce branch rulesets for this private repository; maintainers must apply the documented manual merge gates until the project is mature enough to become public.
+> **Status:** private, manual-governance implementation. TypeChain is not published. Decorated tool adaptation, the optional `type-chain/agent` builder, and the optional in-process `type-chain/typemcp` bridge are implemented on the development branch; runtime policy enforcement remains application-owned. GitHub Free cannot enforce branch rulesets for this private repository; maintainers must apply the documented manual merge gates until the project is mature enough to become public.
 
 TypeChain will make LangChain JS agent and tool definitions easier to author without hiding their runtime contracts. It will use explicit runtime schemas, observable adapters, and policy-aware tools—not magic type inference.
 

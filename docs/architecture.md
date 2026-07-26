@@ -23,7 +23,7 @@ The bridge delegates schema validation, metadata interpretation, and resolver be
 
 ## Intended scope
 
-The next layer will collect adapted tools for explicit `createAgent()` construction. Policy metadata will be passed to runtime middleware/guards for real enforcement.
+Agent construction is available through the optional `type-chain/agent` and `type-chain/typemcp` subpaths. The next layer is application-supplied runtime middleware or guards that make policy metadata enforceable.
 
 ## Non-goals
 
