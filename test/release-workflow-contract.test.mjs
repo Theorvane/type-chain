@@ -20,6 +20,12 @@ test("release promotion accepts only the dev integration branch", async () => {
   );
 
   assert.match(workflow, /pull_request:\n {4}branches: \[main\]/);
+  assert.match(
+    workflow,
+    /HEAD_REPOSITORY: \$\{\{ github\.event\.pull_request\.head\.repo\.full_name \}\}/,
+  );
+  assert.match(workflow, /TARGET_REPOSITORY: \$\{\{ github\.repository \}\}/);
   assert.match(workflow, /test "\$HEAD_REF" = "dev"/);
+  assert.match(workflow, /test "\$HEAD_REPOSITORY" = "\$TARGET_REPOSITORY"/);
   assert.match(workflow, /name: release-promotion/);
 });
