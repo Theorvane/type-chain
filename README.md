@@ -43,7 +43,13 @@ npm run verify
 npm run verify:publish
 ```
 
-The development branch exposes a metadata registry, a LangChain Core tool adapter, and a thin agent builder over LangChain `createAgent()`. It does not enforce approval, authorization, timeout, retry, or audit policies. For example:
+The development branch exposes a metadata registry, a LangChain Core tool adapter, and a thin agent builder over LangChain `createAgent()`. It does not enforce approval, authorization, timeout, retry, or audit policies. Install the optional runtime dependencies—and the provider integration used by the example—in the application:
+
+```bash
+npm install type-chain @langchain/core langchain @langchain/openai zod
+```
+
+Set `OPENAI_API_KEY` before invoking the OpenAI model. For example:
 
 ```ts
 import { Tool } from "type-chain";
@@ -83,7 +89,7 @@ When an external API needs a reusable MCP-shaped tool contract but the LangChain
 Install the optional peer dependencies in the application that imports this subpath:
 
 ```bash
-npm install type-chain @theorvane/type-mcp @langchain/core langchain zod
+npm install type-chain @theorvane/type-mcp @langchain/core langchain @langchain/openai zod
 ```
 
 ```ts
