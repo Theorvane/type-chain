@@ -2,15 +2,15 @@
 
 ## Status
 
-The metadata registry is shipped on the development branch. LangChain adapters, agent builders, schema execution, and runtime policy enforcement are not shipped.
+The development branch provides a metadata registry and a LangChain Core tool adapter. Agent builders and runtime policy enforcement are not shipped.
 
 ## Current implementation
 
-The development branch provides the first primitive: `@Tool()` records explicit name, description, and runtime-schema metadata for a public instance method; `getToolDefinitions(instance)` returns immutable, receiver-bound definitions. This is metadata-only: it does not parse schemas, call LangChain `tool()`, construct agents, or enforce any policy.
+`@Tool()` records explicit name, description, and runtime-schema metadata for a public instance method; `getToolDefinitions(instance)` returns immutable, receiver-bound definitions. `toLangChainTools(instance)` passes each definition to LangChain Core's `tool()` factory, preserving the declared schema and receiver-bound invocation. Input parsing and validation remain LangChain Core's responsibility.
 
 ## Intended scope
 
-The next layer will adapt these instance-bound definitions to LangChain `tool()` and collect them for explicit `createAgent()` construction. Policy metadata will be passed to runtime middleware/guards for real enforcement.
+The next layer will collect adapted tools for explicit `createAgent()` construction. Policy metadata will be passed to runtime middleware/guards for real enforcement.
 
 ## Non-goals
 
