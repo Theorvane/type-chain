@@ -2,15 +2,15 @@
 
 ## Status
 
-The development branch provides a metadata registry and a LangChain Core tool adapter. Agent builders and runtime policy enforcement are not shipped.
+The development branch provides a metadata registry, a LangChain Core tool adapter, and an agent builder that delegates to LangChain `createAgent()`. Runtime policy enforcement is not shipped.
 
 ## Current implementation
 
-`@Tool()` records explicit name, description, and runtime-schema metadata for a public instance method; `getToolDefinitions(instance)` returns immutable, receiver-bound definitions. `toLangChainTools(instance)` passes each definition to LangChain Core's `tool()` factory, preserving the declared schema and receiver-bound invocation. Input parsing and validation remain LangChain Core's responsibility.
+`@Tool()` records explicit name, description, and runtime-schema metadata for a public instance method; `getToolDefinitions(instance)` returns immutable, receiver-bound definitions. `toLangChainTools(instance)` passes each definition to LangChain Core's `tool()` factory, preserving the declared schema and receiver-bound invocation. `@Agent()` records an optional system prompt for a class, and `buildAgent(instance, { model })` passes the bound tools and prompt to LangChain's `createAgent()`. Input parsing and validation remain LangChain Core's responsibility.
 
 ## Intended scope
 
-The next layer will collect adapted tools for explicit `createAgent()` construction. Policy metadata will be passed to runtime middleware/guards for real enforcement.
+The next layer will make runtime policy explicit through middleware/guards that actually enforce authorization, approval, retries, timeout, redaction, and audit requirements.
 
 ## Non-goals
 

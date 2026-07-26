@@ -1,8 +1,9 @@
-import { getToolDefinitions, Tool } from "../src/index.js";
+import { Agent, getToolDefinitions, Tool } from "../src/index.js";
 
 export function createDecoratedFixture() {
   const schema = { type: "object" };
 
+  @Agent({ systemPrompt: "Use decorated fixture tools." })
   class ActualDecoratorFixture {
     prefix = "actual:";
 
@@ -16,8 +17,11 @@ export function createDecoratedFixture() {
     }
   }
 
+  const instance = new ActualDecoratorFixture();
+
   return {
-    definitions: getToolDefinitions(new ActualDecoratorFixture()),
+    definitions: getToolDefinitions(instance),
+    instance,
     schema,
   };
 }

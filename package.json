@@ -55,11 +55,13 @@
     "tools"
   ],
   "peerDependencies": {
-    "@langchain/core": "^1.2.3"
+    "@langchain/core": "^1.2.3",
+    "langchain": "^1.5.4"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.5",
     "@langchain/core": "^1.2.3",
+    "langchain": "^1.5.4",
     "typescript": "^5.9.3",
     "zod": "^4.4.3"
   }
