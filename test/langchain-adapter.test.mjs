@@ -25,6 +25,26 @@ function applyMethodDecorator(instance, methodName, options) {
   }
 }
 
+test("rejects schemas that do not describe structured object input", () => {
+  class PrimitiveTools {
+    echo(input) {
+      return input;
+    }
+  }
+
+  const instance = new PrimitiveTools();
+  applyMethodDecorator(instance, "echo", {
+    name: "echo_value",
+    description: "Echo a primitive value.",
+    schema: z.string().min(2),
+  });
+
+  assert.throws(
+    () => toLangChainTools(instance),
+    /structured object input schema/i,
+  );
+});
+
 test("adapts decorated methods into invocable LangChain structured tools", async () => {
   const schema = z.object({ query: z.string().min(1) });
   class SearchTools {
