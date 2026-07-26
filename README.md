@@ -68,7 +68,7 @@ await searchIssues.invoke({ query: "TypeChain" });
 
 The adapter delegates schema parsing and validation to LangChain Core; it intentionally does not build an agent or enforce approval, authorization, timeout, retry, or audit policies.
 
-`schema` must be an explicit structured-object runtime schema supported by the installed `@langchain/core` version: for example, a Zod object or JSON Schema with `type: "object"`. Primitive schemas are rejected by `toLangChainTools()` because LangChain's dynamic-tool fallback does not preserve their validation semantics. TypeChain passes supported schemas through unchanged; LangChain Core owns parsing and validation. See [architecture](docs/architecture.md), [release guide](docs/release.md), and [contributing guide](CONTRIBUTING.md).
+`schema` must be an explicit structured-object runtime schema supported by the installed `@langchain/core` version: for example, a Zod object (including an object wrapped by a refinement or transform) or JSON Schema with `type: "object"`. Primitive schemas are rejected by `toLangChainTools()` because LangChain's dynamic-tool fallback does not preserve their validation semantics. TypeChain passes supported schemas through unchanged; LangChain Core owns parsing and validation. See [architecture](docs/architecture.md), [release guide](docs/release.md), and [contributing guide](CONTRIBUTING.md).
 
 ## In-process TypeMCP composition
 
