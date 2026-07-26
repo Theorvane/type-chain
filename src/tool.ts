@@ -57,11 +57,7 @@ export function Tool(options: ToolOptions) {
 
       const registrations = toolRegistrations.get(owner) ?? [];
 
-      if (
-        registrations.some(
-          (registration) => registration.options.name === snapshot.name,
-        )
-      ) {
+      if (hasRegisteredToolName(this, snapshot.name)) {
         throw new Error(`Duplicate tool name registered: ${snapshot.name}`);
       }
 
@@ -120,6 +116,14 @@ function validateToolOptions(options: ToolOptions): void {
       "Tool options require an explicit non-null runtime schema object.",
     );
   }
+}
+
+function hasRegisteredToolName(instance: object, name: string): boolean {
+  return findDeclarationOwners(instance).some((owner) =>
+    (toolRegistrations.get(owner) ?? []).some(
+      (registration) => registration.options.name === name,
+    ),
+  );
 }
 
 function findDeclarationOwner(
