@@ -76,14 +76,11 @@ test("release workflow uses a token-free OIDC-only exact-SHA publication path", 
   assert.match(workflow, /GITHUB_SHA: \$\{\{ inputs\.release_sha \}\}/);
   assert.match(
     workflow,
-    /git fetch origin \+refs\/heads\/main:refs\/remotes\/origin\/main/,
+    /ACTUAL_MAIN="\$\(git ls-remote --exit-code origin refs\/heads\/main \| cut -f1\)"/,
   );
-  assert.doesNotMatch(workflow, /git fetch origin main\n/);
-  assert.doesNotMatch(
-    workflow,
-    /git fetch origin main:refs\/remotes\/origin\/main/,
-  );
-  assert.match(workflow, /git rev-parse origin\/main/);
+  assert.doesNotMatch(workflow, /git fetch origin/);
+  assert.doesNotMatch(workflow, /git rev-parse origin\/main/);
+  assert.match(workflow, /test "\$ACTUAL_MAIN" = "\$GITHUB_SHA"/);
   assert.match(workflow, /contents: read/);
   assert.match(workflow, /id-token: write/);
   assert.match(workflow, /environment: npm/);
