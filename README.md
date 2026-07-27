@@ -96,6 +96,7 @@ await agent.invoke({
 | `@Policy()` / `ToolDefinition.policy` | Implemented | Records immutable, declarative policy intent; it never authorizes, retries, logs, or executes a tool. |
 | `withToolPolicyGuard()` | Implemented | Calls an application-supplied guard before a tool that declares policy metadata; TypeChain supplies no default allow/deny decision. |
 | `type-chain/langchain` / `toLangChainTools()` | Implemented | Converts decorated tools into standard LangChain structured tools. |
+| `type-chain/langchain` / `toGuardedLangChainTools()` | Implemented | Converts decorated tools into standard LangChain structured tools while invoking an application-supplied guard for declared policy metadata. |
 | `type-chain/agent` / `@Agent()` / `buildAgent()` | Implemented | Adds class-level prompt metadata and delegates decorated-tool agent construction to LangChain `createAgent()`. |
 | `type-chain/typemcp` / `createTypeMcpLangChainTools()` | Implemented | Converts a TypeMCP-decorated server into LangChain tools in the current Node.js process. |
 | `type-chain/typemcp` / `createTypeMcpAgent()` | Implemented | Resolves TypeMCP tools, then delegates agent construction to LangChain. |
@@ -144,7 +145,7 @@ const guardedDefinitions = withToolPolicyGuard(new IssueTools(), async ({
 });
 ```
 
-This helper performs no default authorization, approval, retry, timeout, idempotency, audit, or redaction decision. It does not produce LangChain tools; pass the resulting definitions to application-owned integration code, or keep using `type-chain/langchain` when policy enforcement occurs elsewhere in the application runtime.
+This helper performs no default authorization, approval, retry, timeout, idempotency, audit, or redaction decision. For the optional LangChain boundary, import `toGuardedLangChainTools()` from `type-chain/langchain` with the same application guard; LangChain Core continues to own structured-input parsing and validation before the guard is invoked.
 
 ## In-process TypeMCP composition
 
