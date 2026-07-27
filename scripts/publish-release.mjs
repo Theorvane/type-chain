@@ -4,10 +4,9 @@ import { readFileSync } from "node:fs";
 const manifest = JSON.parse(readFileSync("package.json", "utf8"));
 const { name, version } = manifest;
 const sha = process.env.GITHUB_SHA;
-const tag = `v${version}`;
 
 if (typeof sha !== "string" || !/^[0-9a-f]{40}$/i.test(sha)) {
-  throw new Error("Release reconciliation requires the exact GITHUB_SHA.");
+  throw new Error("Trusted publication requires the exact GITHUB_SHA.");
 }
 
 function run(command, args, options = {}) {
@@ -18,9 +17,9 @@ function run(command, args, options = {}) {
   }).trim();
 }
 
-function tryRun(command, args, options = {}) {
+function tryRun(command, args) {
   try {
-    return { ok: true, output: run(command, args, options) };
+    return { ok: true, output: run(command, args) };
   } catch (error) {
     return {
       ok: false,
@@ -46,73 +45,22 @@ function requireMatchingGitHead(metadata) {
   }
 }
 
-function tagState() {
-  const raw = tryRun("git", ["rev-parse", "--verify", `refs/tags/${tag}`]);
-  if (!raw.ok) return undefined;
-  const peeled = tryRun("git", ["rev-parse", "--verify", `${tag}^{}`]);
-  if (!peeled.ok) {
-    throw new Error(`Existing ${tag} is not an annotated tag.`);
-  }
-  if (peeled.output !== sha) {
-    throw new Error(`Existing ${tag} targets ${peeled.output}, not ${sha}.`);
-  }
-  return { raw: raw.output, peeled: peeled.output };
-}
-
-function releaseState() {
-  const result = tryRun("gh", [
-    "release",
-    "view",
-    tag,
-    "--json",
-    "targetCommitish",
-  ]);
-  if (!result.ok) {
-    if (/not found|HTTP 404/i.test(result.output)) return undefined;
-    throw new Error(`Unable to inspect GitHub Release state: ${result.output}`);
-  }
-  const release = JSON.parse(result.output);
-  if (release.targetCommitish !== sha) {
-    throw new Error(
-      `Existing GitHub Release ${tag} targets ${release.targetCommitish}, not ${sha}.`,
-    );
-  }
-  return release;
+const checkedOutHead = run("git", ["rev-parse", "HEAD"]);
+if (checkedOutHead !== sha) {
+  throw new Error(
+    `Refusing to publish checked-out ${checkedOutHead}; expected GITHUB_SHA ${sha}.`,
+  );
 }
 
 const publication = registryPackage();
-const publicationExistedBeforeRun = publication !== undefined;
-if (publicationExistedBeforeRun) requireMatchingGitHead(publication);
-
-const tagInfo = tagState();
-if (publicationExistedBeforeRun === false && tagInfo !== undefined) {
-  throw new Error(
-    `Refusing to publish after an existing ${tag}; release state is inconsistent.`,
+if (publication !== undefined) {
+  requireMatchingGitHead(publication);
+  console.log(
+    `Trusted publication already complete for ${name}@${version} at ${sha}.`,
   );
-}
-if (publication === undefined) {
-  console.log(`Publishing ${name}@${version} through npm trusted publishing.`);
-  run("npm", ["publish", "--access", "public"]);
+  process.exit(0);
 }
 
-if (tagInfo === undefined) {
-  run("git", ["tag", "-a", tag, sha, "-m", `Release ${version}`]);
-  run("git", ["push", "origin", tag]);
-}
-
-if (releaseState() === undefined) {
-  run("gh", [
-    "release",
-    "create",
-    tag,
-    "--target",
-    sha,
-    "--title",
-    tag,
-    "--generate-notes",
-  ]);
-}
-
-console.log(
-  `Release reconciliation complete for ${name}@${version} at ${sha}.`,
-);
+console.log(`Publishing ${name}@${version} through npm trusted publishing.`);
+run("npm", ["publish", "--access", "public"]);
+console.log(`Trusted publication submitted for ${name}@${version} at ${sha}.`);

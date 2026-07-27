@@ -12,6 +12,15 @@ test("CI verifies both integration and release branches", async () => {
   assert.match(workflow, /pull_request:\n {4}branches: \[dev, main\]/);
   assert.match(workflow, /verify:\n {4}name: verify/);
   assert.match(workflow, /npm run verify:publish/);
+  assert.match(
+    workflow,
+    /actions\/checkout@11bd71901bbe5b1630ceea73d27597364c9af683/,
+  );
+  assert.match(
+    workflow,
+    /actions\/setup-node@1e60f620b9541d3b22063fe4500f265f2bca9f9e/,
+  );
+  assert.doesNotMatch(workflow, /actions\/(checkout|setup-node)@v\d/);
 });
 
 test("publish readiness verifies an installed packed consumer", async () => {
@@ -45,11 +54,12 @@ test("public release metadata and documentation use the scoped first-release con
   assert.match(releaseGuide, /not yet published/i);
 });
 
-test("release workflow uses OIDC and state-aware publish before tag/release", async () => {
+test("release workflow uses a token-free OIDC-only exact-SHA publication path", async () => {
   const workflow = await readWorkflow("../.github/workflows/publish.yml");
   const script = await readWorkflow("../scripts/publish-release.mjs");
 
   assert.match(workflow, /push:\n {4}branches: \[main\]/);
+  assert.match(workflow, /contents: read/);
   assert.match(workflow, /id-token: write/);
   assert.match(workflow, /environment: npm/);
   assert.match(workflow, /npm run verify:publish/);
@@ -58,12 +68,12 @@ test("release workflow uses OIDC and state-aware publish before tag/release", as
   assert.match(workflow, /npm install --global "npm@>=11\.5\.1"/);
   assert.doesNotMatch(workflow, /npm install --global npm@>=/);
   assert.match(workflow, /GITHUB_SHA: \$\{\{ github\.sha \}\}/);
-  assert.doesNotMatch(workflow, /NPM_TOKEN/);
-  assert.match(script, /"npm", \["publish"/);
-  assert.match(script, /"tag", "-a"/);
-  assert.match(script, /"release",\s+"create"/);
+  assert.doesNotMatch(workflow, /(NPM_TOKEN|GITHUB_TOKEN|contents: write)/);
+  assert.match(script, /"git", \["rev-parse", "HEAD"\]/);
+  assert.match(script, /checkedOutHead !== sha/);
+  assert.match(script, /"npm", \["publish", "--access", "public"\]/);
   assert.match(script, /gitHead/);
-  assert.match(script, /Refusing to publish after an existing/);
+  assert.doesNotMatch(script, /(git tag|"tag"|gh release|"release")/);
 });
 
 test("release promotion accepts only the dev integration branch", async () => {

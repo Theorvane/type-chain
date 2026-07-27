@@ -5,7 +5,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
+  contents: read
   id-token: write
 
 jobs:
@@ -34,9 +34,8 @@ jobs:
       - name: Verify the release artifact
         run: npm run verify:publish
 
-      - name: Reconcile npm publication, annotated tag, and GitHub Release
+      - name: Publish through npm trusted publishing
         env:
-          GITHUB_TOKEN: ${{ github.token }}
           GITHUB_SHA: ${{ github.sha }}
           TYPE_CHAIN_RELEASE_APPROVED: "true"
         run: node scripts/publish-release.mjs
