@@ -93,6 +93,7 @@ await agent.invoke({
 | Surface | Development branch status | What it does |
 | --- | --- | --- |
 | `@Tool()` / `getToolDefinitions()` | Implemented | Records explicit tool metadata and returns immutable, receiver-bound definitions for public instance methods. |
+| `@Policy()` / `ToolDefinition.policy` | Implemented | Records immutable, declarative policy intent; it never authorizes, retries, logs, or executes a tool. |
 | `type-chain/langchain` / `toLangChainTools()` | Implemented | Converts decorated tools into standard LangChain structured tools. |
 | `type-chain/agent` / `@Agent()` / `buildAgent()` | Implemented | Adds class-level prompt metadata and delegates decorated-tool agent construction to LangChain `createAgent()`. |
 | `type-chain/typemcp` / `createTypeMcpLangChainTools()` | Implemented | Converts a TypeMCP-decorated server into LangChain tools in the current Node.js process. |
@@ -106,6 +107,25 @@ await agent.invoke({
 `@Tool()` accepts an explicit, non-null runtime schema object. For `toLangChainTools()`, the schema must describe a **structured object input**: for example, a Zod object (including an object wrapped by a refinement or transform) or JSON Schema with `type: "object"`.
 
 Primitive schemas are intentionally rejected by the LangChain adapter because the dynamic-tool fallback would not preserve their validation semantics. TypeChain passes accepted schemas through; LangChain Core owns parsing and validation.
+
+### Policy declaration contract
+
+`@Policy()` can be applied to the same public instance method as `@Tool()` in either decorator order. It records an immutable `ToolDefinition.policy` snapshot with only explicit intent: `authorization`, `approval`, `audit`, and `idempotency` may be set to `"required"`; `timeoutMs` and `retry.maxAttempts` must be positive safe integers.
+
+```ts
+import { Policy, Tool } from "type-chain";
+
+@Policy({
+  authorization: "required",
+  approval: "required",
+  audit: "required",
+  retry: { maxAttempts: 3 },
+})
+@Tool({ /* explicit name, description, and object schema */ })
+async updateIssue(input: UpdateIssueInput) { /* application behavior */ }
+```
+
+Policy metadata does **not** enforce authorization, approval, retry, timeout, idempotency, audit, or redaction. An application reads the declaration and applies its own reviewed middleware or guards before exposing a state-changing tool.
 
 ## In-process TypeMCP composition
 

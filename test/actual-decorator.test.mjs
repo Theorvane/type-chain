@@ -8,10 +8,24 @@ import { createDecoratedFixture } from "../.test-dist/test-fixtures/actual-decor
 test("collects metadata registered by actual standard TypeScript decorators", async () => {
   const { definitions, instance, schema } = createDecoratedFixture();
 
-  assert.equal(definitions.length, 1);
-  assert.equal(definitions[0]?.name, "actual_search");
-  assert.equal(definitions[0]?.schema, schema);
-  assert.equal(await definitions[0]?.invoke({ query: "42" }), "actual:42");
+  assert.equal(definitions.length, 2);
+  const definition = definitions.find(
+    (candidate) => candidate.name === "actual_search",
+  );
+  const policyDefinition = definitions.find(
+    (candidate) => candidate.name === "actual_policy_search",
+  );
+
+  assert.equal(definition?.schema, schema);
+  assert.equal(await definition?.invoke({ query: "42" }), "actual:42");
+  assert.deepEqual(policyDefinition?.policy, {
+    authorization: "required",
+    retry: { maxAttempts: 2 },
+  });
+  assert.equal(
+    await policyDefinition?.invoke({ query: "42" }),
+    "actual:policy:42",
+  );
 
   const agent = buildAgent(instance, {
     model: new FakeToolCallingModel({
