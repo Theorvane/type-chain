@@ -36,6 +36,9 @@ test("public release metadata and documentation use the scoped first-release con
   assert.equal(manifest.name, "@theorvane/type-chain");
   assert.equal(manifest.version, "0.1.0");
   assert.equal(manifest.publishConfig.access, "public");
+  assert.match(readme, /After registry publication is verified/);
+  assert.match(readme, /not yet published/i);
+  assert.doesNotMatch(readme, /Install the published package/);
   assert.match(readme, /npm install @theorvane\/type-chain/);
   assert.match(readme, /from "@theorvane\/type-chain/);
   assert.match(releaseGuide, /@theorvane\/type-chain@0\.1\.0/);

@@ -19,7 +19,7 @@ TypeChain keeps explicit runtime schemas and LangChain contracts visible while m
 
 ## Fast path
 
-1. Install the published package: `npm install @theorvane/type-chain`.
+1. **After registry publication is verified**, install the package: `npm install @theorvane/type-chain`. Until then, use the repository-local workflow below.
 2. Enable standard TypeScript decorators (`"experimentalDecorators": false`) and compile for a modern Node.js target.
 3. Import `toLangChainTools()` from `@theorvane/type-chain/langchain` to create standard LangChain tools.
 4. Import `@Agent()` and `buildAgent()` from `@theorvane/type-chain/agent` when the application owns a LangChain model and agent lifecycle.
