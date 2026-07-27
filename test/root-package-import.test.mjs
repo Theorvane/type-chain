@@ -1,11 +1,14 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 
 const packageRoot = new URL("..", import.meta.url).pathname;
+const packageName = JSON.parse(
+  readFileSync(new URL("../package.json", import.meta.url)),
+).name;
 
 test("imports the metadata-only root package without optional peers", () => {
   const consumer = mkdtempSync(join(tmpdir(), "type-chain-root-consumer-"));
@@ -36,7 +39,7 @@ test("imports the metadata-only root package without optional peers", () => {
       [
         "--input-type=module",
         "--eval",
-        'import * as typeChain from "type-chain"; console.log(Object.keys(typeChain).sort().join(","));',
+        `import * as typeChain from ${JSON.stringify(packageName)}; console.log(Object.keys(typeChain).sort().join(","));`,
       ],
       { cwd: consumer, encoding: "utf8" },
     );

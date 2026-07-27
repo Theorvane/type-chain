@@ -13,3 +13,9 @@ if (manifest.version === "0.0.0-development") {
     "Publication is blocked: choose a reviewed, release-ready version.",
   );
 }
+if (!manifest.name.startsWith("@theorvane/")) {
+  throw new Error("Publication is blocked: use the Theorvane npm scope.");
+}
+if (manifest.publishConfig?.access !== "public") {
+  throw new Error("Publication is blocked: public npm access is required.");
+}

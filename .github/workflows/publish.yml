@@ -1,0 +1,41 @@
+name: Publish npm release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    name: publish
+    runs-on: ubuntu-latest
+    environment: npm
+    steps:
+      - name: Check out the protected release commit
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - name: Install the npm CLI required for trusted publishing
+        run: npm install --global "npm@>=11.5.1"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify the release artifact
+        run: npm run verify:publish
+
+      - name: Publish through npm trusted publishing
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          TYPE_CHAIN_RELEASE_APPROVED: "true"
+        run: node scripts/publish-release.mjs

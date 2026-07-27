@@ -1,6 +1,6 @@
 {
-  "name": "type-chain",
-  "version": "0.0.0-development",
+  "name": "@theorvane/type-chain",
+  "version": "0.1.0",
   "description": "Decorator-first, type-safe authoring layer for LangChain JS tools and agents.",
   "license": "MIT",
   "type": "module",
