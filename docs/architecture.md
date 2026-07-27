@@ -2,11 +2,28 @@
 
 ## Status
 
-This is a design boundary, not an implementation claim. No decorator, tool adapter, agent builder, or LangChain integration is shipped.
+The development branch exposes a metadata registry and optional LangChain adapters. Import `type-chain/langchain` for decorated tools, `type-chain/agent` for the direct `@Agent()` builder, or `type-chain/typemcp` for in-process TypeMCP composition. Root metadata imports stay independent of optional peers; TypeChain does not enforce runtime policy.
+
+## Current implementation
+
+`@Tool()` records explicit name, description, and runtime-schema metadata for a public instance method; `@Policy()` records optional declarative policy intent for that same method. `getToolDefinitions(instance)` returns immutable, receiver-bound definitions with an immutable policy snapshot when declared. `withToolPolicyGuard(instance, guard)` creates frozen wrapper definitions that call an application-owned guard before invoking only policy-decorated tools; it contains no default authorization, approval, retry, timeout, idempotency, audit, or redaction decision. `toLangChainTools(instance)` passes each definition to LangChain Core's `tool()` factory, preserving the declared schema and receiver-bound invocation. `toGuardedLangChainTools(instance, guard)` uses the same adapter after application-guard composition, so LangChain Core still validates structured inputs before a declared-policy guard runs. Input parsing and validation remain LangChain Core's responsibility.
+
+## TypeMCP in-process bridge
+
+`type-chain/typemcp` is an optional composition boundary for a TypeMCP-decorated server that lives in the same Node.js process as a LangChain application:
+
+```text
+external API client → @McpTool server + explicit resolver
+                    → TypeMCP createLangChainTools()
+                    → TypeChain createTypeMcpAgent()
+                    → LangChain createAgent()
+```
+
+The bridge delegates schema validation, metadata interpretation, and resolver behavior to TypeMCP. It delegates agent construction to LangChain. `createGuardedTypeMcpLangChainTools()` and `createGuardedTypeMcpAgent()` may call an application-provided guard after TypeMCP/LangChain input validation and before a resolver-backed tool method. The immutable context contains only the tool name, description, and a normalized immutable snapshot of validated input; dates, maps, sets, regular expressions, buffers, and typed arrays are represented by frozen plain-data descriptors. The guard cannot alter the input passed to the resolver. They do not provide a default allow/deny decision. The bridge deliberately does not open HTTP/stdio transports, implement MCP client/session behavior, supply API credentials, or enforce authorization, approval, retries, timeouts, auditing, or redaction. An application needing cross-process MCP access uses TypeMCP's transport hosts independently.
 
 ## Intended scope
 
-TypeChain will record decorated method metadata, bind it to a dependency-injected instance, adapt the bound method to LangChain `tool()` using an explicit runtime schema, and collect tools for explicit `createAgent()` construction. Policy metadata is passed to runtime middleware/guards for real enforcement.
+Agent construction is available through the optional `type-chain/agent` and `type-chain/typemcp` subpaths. `buildGuardedAgent()` composes the application's policy guard with the direct LangChain agent boundary. The next layer remains application-supplied runtime middleware or guards that make policy metadata enforceable.
 
 ## Non-goals
 

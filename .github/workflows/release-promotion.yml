@@ -12,7 +12,11 @@ jobs:
     name: release-promotion
     runs-on: ubuntu-latest
     steps:
-      - name: Require dev as the exact promotion source
+      - name: Require the canonical dev integration branch
         env:
           HEAD_REF: ${{ github.head_ref }}
-        run: test "$HEAD_REF" = "dev"
+          HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+          TARGET_REPOSITORY: ${{ github.repository }}
+        run: |
+          test "$HEAD_REF" = "dev"
+          test "$HEAD_REPOSITORY" = "$TARGET_REPOSITORY"

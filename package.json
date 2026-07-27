@@ -1,6 +1,6 @@
 {
-  "name": "type-chain",
-  "version": "0.0.0-development",
+  "name": "@theorvane/type-chain",
+  "version": "0.1.0",
   "description": "Decorator-first, type-safe authoring layer for LangChain JS tools and agents.",
   "license": "MIT",
   "type": "module",
@@ -15,6 +15,21 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./langchain": {
+      "types": "./dist/langchain.d.ts",
+      "import": "./dist/langchain.js",
+      "default": "./dist/langchain.js"
+    },
+    "./agent": {
+      "types": "./dist/agent.d.ts",
+      "import": "./dist/agent.js",
+      "default": "./dist/agent.js"
+    },
+    "./typemcp": {
+      "types": "./dist/typemcp.d.ts",
+      "import": "./dist/typemcp.js",
+      "default": "./dist/typemcp.js"
     }
   },
   "types": "./dist/index.d.ts",
@@ -31,10 +46,12 @@
     "lint": "biome check .",
     "format:check": "biome format .",
     "typecheck": "tsc --noEmit",
-    "test": "node --test",
+    "build:test-fixtures": "tsc --project tsconfig.test-fixtures.json",
+    "test": "npm run build && npm run build:test-fixtures && node --test",
     "verify": "npm run lint && npm run typecheck && npm run test && npm run build && npm run verify:package",
     "verify:package": "node scripts/verify-package.mjs",
-    "verify:publish": "npm run verify && npm pack --dry-run --json --ignore-scripts",
+    "verify:consumer": "node scripts/verify-packed-consumer.mjs",
+    "verify:publish": "npm run verify && npm run verify:consumer && npm pack --dry-run --json --ignore-scripts",
     "prepublishOnly": "node scripts/assert-release-readiness.mjs && npm run verify:publish"
   },
   "repository": {
@@ -53,8 +70,29 @@
     "agents",
     "tools"
   ],
+  "peerDependencies": {
+    "@langchain/core": "^1.2.3",
+    "@theorvane/type-mcp": "^0.2.0",
+    "langchain": "^1.5.4"
+  },
+  "peerDependenciesMeta": {
+    "@langchain/core": {
+      "optional": true
+    },
+    "@theorvane/type-mcp": {
+      "optional": true
+    },
+    "langchain": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@biomejs/biome": "^2.5.5",
-    "typescript": "^5.9.3"
+    "@langchain/core": "1.2.3",
+    "@theorvane/type-mcp": "0.2.0",
+    "langchain": "1.5.4",
+    "typescript": "^5.9.3",
+    "zod": "^4.4.3",
+    "zod-v3": "npm:zod@^3.25.76"
   }
 }
