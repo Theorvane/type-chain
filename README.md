@@ -101,6 +101,7 @@ await agent.invoke({
 | `type-chain/agent` / `buildGuardedAgent()` | Implemented | Builds a standard LangChain agent that invokes an application-supplied guard for declared policy metadata. |
 | `type-chain/typemcp` / `createTypeMcpLangChainTools()` | Implemented | Converts a TypeMCP-decorated server into LangChain tools in the current Node.js process. |
 | `type-chain/typemcp` / `createTypeMcpAgent()` | Implemented | Resolves TypeMCP tools, then delegates agent construction to LangChain. |
+| `type-chain/typemcp` / `createGuardedTypeMcpAgent()` | Implemented | Delegates guarded in-process TypeMCP tools to LangChain while the application decides whether each invocation proceeds. |
 | HTTP or stdio MCP hosting | Not provided | Use TypeMCP's transport hosts when an MCP server must communicate across processes. |
 | Runtime policy enforcement | Not provided | The application must enforce authorization, approval, retries, timeouts, audit, redaction, and persistence. |
 | npm distribution | Not published | This repository is private and its package name is not currently available on npm. |

@@ -77,7 +77,7 @@ try {
       `const langchain = await import(${JSON.stringify(`${packageName}/langchain`)});`,
       `const agent = await import(${JSON.stringify(`${packageName}/agent`)});`,
       `const typemcp = await import(${JSON.stringify(`${packageName}/typemcp`)});`,
-      "for (const [module, names] of [[langchain, ['toLangChainTools', 'toGuardedLangChainTools']], [agent, ['Agent', 'buildAgent', 'buildGuardedAgent']], [typemcp, ['createTypeMcpLangChainTools', 'createTypeMcpAgent']]]) {",
+      "for (const [module, names] of [[langchain, ['toLangChainTools', 'toGuardedLangChainTools']], [agent, ['Agent', 'buildAgent', 'buildGuardedAgent']], [typemcp, ['createTypeMcpLangChainTools', 'createGuardedTypeMcpLangChainTools', 'createTypeMcpAgent', 'createGuardedTypeMcpAgent']]]) {",
       "  for (const name of names) if (!(name in module)) throw new Error('Missing subpath export: ' + name);",
       "}",
     ].join("\n"),
