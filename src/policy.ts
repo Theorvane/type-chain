@@ -59,6 +59,10 @@ export function Policy(policy: ToolPolicy) {
       const registrations = policyRegistrations.get(owner) ?? new Map();
       const existing = registrations.get(context.name);
 
+      if (existing === snapshot) {
+        return;
+      }
+
       if (existing !== undefined) {
         throw new Error(
           `Policy metadata already registered for method: ${String(context.name)}`,

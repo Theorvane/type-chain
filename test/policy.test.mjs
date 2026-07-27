@@ -101,6 +101,43 @@ test("attaches an immutable policy snapshot regardless of decorator order", () =
   }
 });
 
+test("reuses policy metadata when a decorated class is instantiated twice", () => {
+  class ReusableTool {
+    execute() {
+      return "reusable";
+    }
+  }
+
+  const options = {
+    name: "reusable_execute",
+    description: "Execute a reusable policy-decorated tool.",
+    schema: { type: "object" },
+  };
+  const policy = { authorization: "required" };
+
+  const policyInitializers = collectInitializers(
+    Policy(policy),
+    ReusableTool.prototype.execute,
+    "execute",
+  );
+  const toolInitializers = collectInitializers(
+    Tool(options),
+    ReusableTool.prototype.execute,
+    "execute",
+  );
+
+  for (const instance of [new ReusableTool(), new ReusableTool()]) {
+    for (const initializer of [...policyInitializers, ...toolInitializers]) {
+      initializer.call(instance);
+    }
+  }
+
+  const [definition] = getToolDefinitions(new ReusableTool());
+
+  assert.deepEqual(definition?.policy, policy);
+  assert.equal(definition?.invoke({}), "reusable");
+});
+
 test("retains policy metadata for an inherited decorated tool", () => {
   class Parent {
     execute() {
