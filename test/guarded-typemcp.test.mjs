@@ -5,6 +5,7 @@ import { FakeToolCallingModel } from "langchain";
 import {
   ExternalApiServer,
   FakeExternalApiClient,
+  RichInputServer,
 } from "../.test-dist/test-fixtures/typemcp.fixture.js";
 import {
   createGuardedTypeMcpAgent,
@@ -86,6 +87,35 @@ test("prevents a TypeMCP guard from mutating resolver input through its context"
     /read only|not extensible|frozen/i,
   );
   assert.equal(client.received, undefined);
+});
+
+test("normalizes mutable rich inputs into an immutable guard snapshot", async () => {
+  const server = new RichInputServer();
+  const tools = await createGuardedTypeMcpLangChainTools(
+    RichInputServer,
+    { resolver: { resolve: () => server } },
+    ({ input }) => {
+      assert.deepEqual(input, {
+        at: { type: "date", value: "2026-07-27T00:00:00.000Z" },
+        labels: { type: "map", entries: [["priority", 1]] },
+        values: { type: "set", values: ["release"] },
+        bytes: { type: "Uint8Array", bytes: [4, 5] },
+      });
+      assert.equal(Object.isFrozen(input.at), true);
+      assert.equal(Object.isFrozen(input.labels.entries), true);
+      assert.equal(Object.isFrozen(input.values.values), true);
+      assert.equal(Object.isFrozen(input.bytes.bytes), true);
+    },
+  );
+  const input = {
+    at: new Date("2026-07-27T00:00:00.000Z"),
+    labels: new Map([["priority", 1]]),
+    values: new Set(["release"]),
+    bytes: new Uint8Array([4, 5]),
+  };
+
+  assert.equal(await tools[0].invoke(input), "inspected");
+  assert.deepEqual(server.observed, input);
 });
 
 test("prevents a TypeMCP resolver method when its agent guard rejects", async () => {

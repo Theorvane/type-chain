@@ -32,6 +32,26 @@ export class ExternalApiServer {
   }
 }
 
+@McpServer({ name: "rich_input", version: "1.0.0" })
+export class RichInputServer {
+  observed: unknown;
+
+  @McpTool({
+    name: "inspect_rich_input",
+    description: "Inspect rich structured input without mutating it.",
+    input: z.object({
+      at: z.date(),
+      labels: z.map(z.string(), z.number()),
+      values: z.set(z.string()),
+      bytes: z.instanceof(Uint8Array),
+    }),
+  })
+  inspect(input: unknown): string {
+    this.observed = input;
+    return "inspected";
+  }
+}
+
 function isExternalApiClient(value: unknown): value is ExternalApiClient {
   return (
     typeof value === "object" &&

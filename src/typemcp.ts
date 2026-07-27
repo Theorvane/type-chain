@@ -64,13 +64,87 @@ export async function createGuardedTypeMcpLangChainTools<T extends object>(
   return tools.map((source) => guardTypeMcpTool(source, guard));
 }
 
-function deepFreeze<T>(value: T): Readonly<T> {
-  if (value !== null && typeof value === "object" && !Object.isFrozen(value)) {
-    for (const property of Object.values(value)) deepFreeze(property);
-    Object.freeze(value);
+function immutableInputSnapshot(input: unknown): unknown {
+  return snapshotValue(structuredClone(input), new WeakSet<object>());
+}
+
+function snapshotValue(value: unknown, ancestors: WeakSet<object>): unknown {
+  if (value === null || typeof value !== "object") return value;
+  if (ancestors.has(value)) {
+    throw new TypeError("TypeMCP guard input cannot contain cyclic values.");
   }
 
-  return value;
+  ancestors.add(value);
+  try {
+    if (value instanceof Date) {
+      return Object.freeze({ type: "date", value: value.toISOString() });
+    }
+    if (value instanceof Map) {
+      return Object.freeze({
+        type: "map",
+        entries: Object.freeze(
+          [...value].map(([key, entry]) =>
+            Object.freeze([
+              snapshotValue(key, ancestors),
+              snapshotValue(entry, ancestors),
+            ]),
+          ),
+        ),
+      });
+    }
+    if (value instanceof Set) {
+      return Object.freeze({
+        type: "set",
+        values: Object.freeze(
+          [...value].map((entry) => snapshotValue(entry, ancestors)),
+        ),
+      });
+    }
+    if (value instanceof RegExp) {
+      return Object.freeze({
+        type: "regexp",
+        source: value.source,
+        flags: value.flags,
+      });
+    }
+    if (value instanceof ArrayBuffer) {
+      return Object.freeze({
+        type: "array-buffer",
+        bytes: Object.freeze([...new Uint8Array(value)]),
+      });
+    }
+    if (ArrayBuffer.isView(value)) {
+      return Object.freeze({
+        type: value.constructor.name,
+        bytes: Object.freeze([
+          ...new Uint8Array(value.buffer, value.byteOffset, value.byteLength),
+        ]),
+      });
+    }
+    if (Array.isArray(value)) {
+      return Object.freeze(
+        value.map((entry) => snapshotValue(entry, ancestors)),
+      );
+    }
+
+    const prototype = Object.getPrototypeOf(value);
+    if (prototype !== Object.prototype && prototype !== null) {
+      throw new TypeError(
+        "TypeMCP guard input contains an unsupported object.",
+      );
+    }
+
+    return Object.freeze(
+      Object.fromEntries(
+        Object.entries(value).map(([key, entry]) => [
+          key,
+          snapshotValue(entry, ancestors),
+        ]),
+      ),
+    );
+  } finally {
+    ancestors.delete(value);
+  }
 }
 
 function guardTypeMcpTool(
@@ -83,7 +157,7 @@ function guardTypeMcpTool(
         Object.freeze({
           name: source.name,
           description: source.description,
-          input: deepFreeze(structuredClone(input)),
+          input: immutableInputSnapshot(input),
         }),
       );
 
