@@ -1,29 +1,48 @@
 # npm Release Guide
 
-`type-chain` is not published. The repository is private under manual governance. A private GitHub repository may later publish a public npm package; repository and registry visibility are separate.
+The intended public package is **`@theorvane/type-chain@0.1.0`**. It is **not yet published**: this document describes the reviewed release path and must not be read as registry-install evidence.
 
-## Public-conversion gate
+## Publication prerequisites
 
-Keep the repository private until the implementation, public API documentation, consumer-tarball verification, npm release-readiness, and independent review are complete. At that point, switch the repository to public and create/read back active GitHub rulesets for `dev` (`verify`) and `main` (`verify` and `release-promotion`) before accepting public implementation PRs. Until then, follow the manual merge evidence requirements in `CONTRIBUTING.md` and `.agents/README.md`.
+1. The GitHub repository is public and active rulesets protect `dev` (`verify`) and `main` (`verify`, `release-promotion`).
+2. The npm organization owns the `@theorvane` scope and permits publication of `@theorvane/type-chain`.
+3. A reviewed, repository-owned `dev` → `main` promotion passes CI and `release-promotion`.
+4. npm Trusted Publishing is configured for this repository, `.github/workflows/publish.yml`, and the protected `npm` GitHub Environment.
+5. The named version is absent from the npm registry or an existing package/tag/release state proves it was produced from the exact `main` SHA.
+6. Every open dependency advisory has a documented maintainer disposition; a clean production audit alone does not close that decision.
 
-## First-release prerequisites
+### Current advisory disposition
 
-1. Implementation, public API documentation, tests, build, and tarball verification are complete.
-2. Version is not `0.0.0-development`.
-3. The npm name is rechecked and an authorized npm account has publish rights.
-4. A GitHub Actions OIDC trusted publisher is configured for the exact repository, workflow, and protected `npm` environment.
-5. A reviewed `dev` → `main` PR passes CI and `release-promotion`.
+The current open Dependabot alert is a moderate advisory in `@hono/node-server`, installed only through the development dependency path `@theorvane/type-mcp` → `@modelcontextprotocol/sdk` → `@hono/node-server`. `npm audit --omit=dev --audit-level=low` is clean for the packed root artifact. TypeMCP's HTTP transport cannot be superficially downgraded without losing the required web-standard transport support; track remediation with the upstream TypeMCP transport work rather than publishing a misleading downgrade.
 
-## Invariant
+## Automated release path
 
-The npm version, annotated tag `v<version>`, and GitHub Release must resolve to the same protected `main` commit. Publish first, then tag, then GitHub Release. Never persist an npm token in this repository.
+After a reviewed `dev` → `main` merge, `.github/workflows/publish.yml` runs only on the protected `main` push. It uses GitHub OIDC (`id-token: write`) and never reads an `NPM_TOKEN`.
 
-## Verification
+The workflow:
 
-Before a release, run `npm run verify:publish`. In addition to the build, package-artifact, and dry-run manifest checks, it packs the current source, installs that tarball into clean temporary consumers, and proves:
+1. installs dependencies and runs `npm run verify:publish`;
+2. reconciles the exact registry package, annotated `v<version>` tag, and GitHub Release against `GITHUB_SHA`;
+3. publishes first, creates/pushes an annotated tag second, and creates the GitHub Release last.
 
-- the root package imports with optional peers omitted;
-- `type-chain/langchain`, `type-chain/agent`, and `type-chain/typemcp` import with the declared peers installed; and
-- each public subpath exposes its documented runtime entrypoints.
+The reconciler fails closed on mismatched or partial state. It will not publish after a pre-existing tag, and on a retry it requires an existing npm package to report a matching `gitHead` before treating it as safe. A fresh trusted-publish run proceeds from npm's successful publish response because registry readback can lag or omit `gitHead`; if a later retry cannot prove `gitHead`, it stops for maintainer investigation rather than guessing.
 
-Poll `npm view type-chain@<version> version dist-tags --json`, install the exact registry artifact in a clean consumer, test every documented import/bin, and verify the annotated tag and GitHub Release target the same SHA.
+## First-release bootstrap
+
+npm may require one explicit, authorized bootstrap publication before it lets a package configure Trusted Publishing. If that is necessary, use a short-lived package-scoped credential only after the protected `main` release commit, tarball checks, package-name availability, and user authorization are confirmed. Do not store a token in source control or repository secrets; revoke it after bootstrap and configure the OIDC trusted publisher for all subsequent releases.
+
+## Consumer verification
+
+Before publishing, `npm run verify:publish` builds, inspects the package archive, and installs it into clean temporary consumers. It proves:
+
+- the root import works without optional peers;
+- `@theorvane/type-chain/langchain`, `@theorvane/type-chain/agent`, and `@theorvane/type-chain/typemcp` import with declared peers; and
+- documented runtime exports are present in the packed tarball.
+
+After a successful publication, poll:
+
+```sh
+npm view @theorvane/type-chain@0.1.0 version dist-tags --json
+```
+
+Then install that exact registry version into a fresh consumer and verify every documented import. Finally, verify that the annotated tag and GitHub Release resolve to the same `main` SHA as the registry artifact.

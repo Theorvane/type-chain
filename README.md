@@ -19,11 +19,13 @@ TypeChain keeps explicit runtime schemas and LangChain contracts visible while m
 
 ## Fast path
 
-1. Clone this repository and work from the `dev` branch; do not install `type-chain` from npm because it is not published.
-2. Use `@Tool()` plus an explicit object runtime schema to declare an instance method.
-3. Import `toLangChainTools()` from `type-chain/langchain` to create standard LangChain tools.
-4. Import `@Agent()` and `buildAgent()` from `type-chain/agent` when the application owns a LangChain model and agent lifecycle.
-5. Use `type-chain/typemcp` only for in-process composition of a TypeMCP-decorated server; it does not open an MCP transport.
+1. Install the published package: `npm install @theorvane/type-chain`.
+2. Enable standard TypeScript decorators (`"experimentalDecorators": false`) and compile for a modern Node.js target.
+3. Import `toLangChainTools()` from `@theorvane/type-chain/langchain` to create standard LangChain tools.
+4. Import `@Agent()` and `buildAgent()` from `@theorvane/type-chain/agent` when the application owns a LangChain model and agent lifecycle.
+5. Use `@theorvane/type-chain/typemcp` only for in-process composition of a TypeMCP-decorated server; it does not open an MCP transport.
+
+> **Release status:** the first public release is prepared as `@theorvane/type-chain@0.1.0` but is **not yet published**. Until registry verification succeeds, use the repository-local workflow below.
 
 ## Development setup
 
@@ -61,8 +63,8 @@ npm install @langchain/core langchain @langchain/openai zod
 ```
 
 ```ts
-import { Tool } from "type-chain";
-import { Agent, buildAgent } from "type-chain/agent";
+import { Tool } from "@theorvane/type-chain";
+import { Agent, buildAgent } from "@theorvane/type-chain/agent";
 import { initChatModel } from "langchain";
 import { z } from "zod";
 
@@ -95,16 +97,16 @@ await agent.invoke({
 | `@Tool()` / `getToolDefinitions()` | Implemented | Records explicit tool metadata and returns immutable, receiver-bound definitions for public instance methods. |
 | `@Policy()` / `ToolDefinition.policy` | Implemented | Records immutable, declarative policy intent; it never authorizes, retries, logs, or executes a tool. |
 | `withToolPolicyGuard()` | Implemented | Calls an application-supplied guard before a tool that declares policy metadata; TypeChain supplies no default allow/deny decision. |
-| `type-chain/langchain` / `toLangChainTools()` | Implemented | Converts decorated tools into standard LangChain structured tools. |
-| `type-chain/langchain` / `toGuardedLangChainTools()` | Implemented | Converts decorated tools into standard LangChain structured tools while invoking an application-supplied guard for declared policy metadata. |
-| `type-chain/agent` / `@Agent()` / `buildAgent()` | Implemented | Adds class-level prompt metadata and delegates decorated-tool agent construction to LangChain `createAgent()`. |
-| `type-chain/agent` / `buildGuardedAgent()` | Implemented | Builds a standard LangChain agent that invokes an application-supplied guard for declared policy metadata. |
-| `type-chain/typemcp` / `createTypeMcpLangChainTools()` | Implemented | Converts a TypeMCP-decorated server into LangChain tools in the current Node.js process. |
-| `type-chain/typemcp` / `createTypeMcpAgent()` | Implemented | Resolves TypeMCP tools, then delegates agent construction to LangChain. |
-| `type-chain/typemcp` / `createGuardedTypeMcpAgent()` | Implemented | Delegates guarded in-process TypeMCP tools to LangChain while the application decides whether each invocation proceeds. |
+| `@theorvane/type-chain/langchain` / `toLangChainTools()` | Implemented | Converts decorated tools into standard LangChain structured tools. |
+| `@theorvane/type-chain/langchain` / `toGuardedLangChainTools()` | Implemented | Converts decorated tools into standard LangChain structured tools while invoking an application-supplied guard for declared policy metadata. |
+| `@theorvane/type-chain/agent` / `@Agent()` / `buildAgent()` | Implemented | Adds class-level prompt metadata and delegates decorated-tool agent construction to LangChain `createAgent()`. |
+| `@theorvane/type-chain/agent` / `buildGuardedAgent()` | Implemented | Builds a standard LangChain agent that invokes an application-supplied guard for declared policy metadata. |
+| `@theorvane/type-chain/typemcp` / `createTypeMcpLangChainTools()` | Implemented | Converts a TypeMCP-decorated server into LangChain tools in the current Node.js process. |
+| `@theorvane/type-chain/typemcp` / `createTypeMcpAgent()` | Implemented | Resolves TypeMCP tools, then delegates agent construction to LangChain. |
+| `@theorvane/type-chain/typemcp` / `createGuardedTypeMcpAgent()` | Implemented | Delegates guarded in-process TypeMCP tools to LangChain while the application decides whether each invocation proceeds. |
 | HTTP or stdio MCP hosting | Not provided | Use TypeMCP's transport hosts when an MCP server must communicate across processes. |
 | Runtime policy enforcement | Not provided | The application must enforce authorization, approval, retries, timeouts, audit, redaction, and persistence. |
-| npm distribution | Not published | This repository is private and its package name is not currently available on npm. |
+| npm distribution | Release prepared | `@theorvane/type-chain@0.1.0` is prepared for trusted publishing but is not yet available from npm. |
 
 ### Schema contract
 
@@ -117,7 +119,7 @@ Primitive schemas are intentionally rejected by the LangChain adapter because th
 `@Policy()` can be applied to the same public instance method as `@Tool()` in either decorator order. It records an immutable `ToolDefinition.policy` snapshot with only explicit intent: `authorization`, `approval`, `audit`, and `idempotency` may be set to `"required"`; `timeoutMs` and `retry.maxAttempts` must be positive safe integers.
 
 ```ts
-import { Policy, Tool } from "type-chain";
+import { Policy, Tool } from "@theorvane/type-chain";
 
 @Policy({
   authorization: "required",
@@ -136,7 +138,7 @@ Policy metadata does **not** enforce authorization, approval, retry, timeout, id
 `withToolPolicyGuard(instance, guard)` returns new frozen receiver-bound definitions. It invokes the supplied application guard only for definitions that declare `@Policy()` metadata; the guard receives the original immutable definition, its policy snapshot, and the original input. Throwing or rejecting prevents the method invocation and its error is propagated unchanged.
 
 ```ts
-import { withToolPolicyGuard } from "type-chain";
+import { withToolPolicyGuard } from "@theorvane/type-chain";
 
 const guardedDefinitions = withToolPolicyGuard(new IssueTools(), async ({
   definition,
@@ -147,11 +149,11 @@ const guardedDefinitions = withToolPolicyGuard(new IssueTools(), async ({
 });
 ```
 
-This helper performs no default authorization, approval, retry, timeout, idempotency, audit, or redaction decision. For the optional LangChain boundary, import `toGuardedLangChainTools()` from `type-chain/langchain` with the same application guard; LangChain Core continues to own structured-input parsing and validation before the guard is invoked. For the direct agent boundary, import `buildGuardedAgent()` from `type-chain/agent`; it delegates to LangChain `createAgent()` with those guarded tools and leaves model lifecycle and runtime policy decisions to the application.
+This helper performs no default authorization, approval, retry, timeout, idempotency, audit, or redaction decision. For the optional LangChain boundary, import `toGuardedLangChainTools()` from `@theorvane/type-chain/langchain` with the same application guard; LangChain Core continues to own structured-input parsing and validation before the guard is invoked. For the direct agent boundary, import `buildGuardedAgent()` from `@theorvane/type-chain/agent`; it delegates to LangChain `createAgent()` with those guarded tools and leaves model lifecycle and runtime policy decisions to the application.
 
 ## In-process TypeMCP composition
 
-Use the optional `type-chain/typemcp` subpath when an external API is wrapped as a TypeMCP tool and the LangChain agent runs in the **same Node.js process**:
+Use the optional `@theorvane/type-chain/typemcp` subpath when an external API is wrapped as a TypeMCP tool and the LangChain agent runs in the **same Node.js process**:
 
 ```text
 external API client → TypeMCP-decorated tool + explicit resolver
@@ -168,7 +170,7 @@ npm install @theorvane/type-mcp @langchain/core langchain @langchain/openai zod
 
 ```ts
 import { McpServer, McpTool } from "@theorvane/type-mcp";
-import { createTypeMcpAgent } from "type-chain/typemcp";
+import { createTypeMcpAgent } from "@theorvane/type-chain/typemcp";
 import { initChatModel } from "langchain";
 import { z } from "zod";
 
