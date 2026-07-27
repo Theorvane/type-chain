@@ -94,6 +94,7 @@ await agent.invoke({
 | --- | --- | --- |
 | `@Tool()` / `getToolDefinitions()` | Implemented | Records explicit tool metadata and returns immutable, receiver-bound definitions for public instance methods. |
 | `@Policy()` / `ToolDefinition.policy` | Implemented | Records immutable, declarative policy intent; it never authorizes, retries, logs, or executes a tool. |
+| `withToolPolicyGuard()` | Implemented | Calls an application-supplied guard before a tool that declares policy metadata; TypeChain supplies no default allow/deny decision. |
 | `type-chain/langchain` / `toLangChainTools()` | Implemented | Converts decorated tools into standard LangChain structured tools. |
 | `type-chain/agent` / `@Agent()` / `buildAgent()` | Implemented | Adds class-level prompt metadata and delegates decorated-tool agent construction to LangChain `createAgent()`. |
 | `type-chain/typemcp` / `createTypeMcpLangChainTools()` | Implemented | Converts a TypeMCP-decorated server into LangChain tools in the current Node.js process. |
@@ -126,6 +127,24 @@ async updateIssue(input: UpdateIssueInput) { /* application behavior */ }
 ```
 
 Policy metadata does **not** enforce authorization, approval, retry, timeout, idempotency, audit, or redaction. An application reads the declaration and applies its own reviewed middleware or guards before exposing a state-changing tool.
+
+### Guard composition
+
+`withToolPolicyGuard(instance, guard)` returns new frozen receiver-bound definitions. It invokes the supplied application guard only for definitions that declare `@Policy()` metadata; the guard receives the original immutable definition, its policy snapshot, and the original input. Throwing or rejecting prevents the method invocation and its error is propagated unchanged.
+
+```ts
+import { withToolPolicyGuard } from "type-chain";
+
+const guardedDefinitions = withToolPolicyGuard(new IssueTools(), async ({
+  definition,
+  input,
+  policy,
+}) => {
+  await applicationPolicyMiddleware({ definition, input, policy });
+});
+```
+
+This helper performs no default authorization, approval, retry, timeout, idempotency, audit, or redaction decision. It does not produce LangChain tools; pass the resulting definitions to application-owned integration code, or keep using `type-chain/langchain` when policy enforcement occurs elsewhere in the application runtime.
 
 ## In-process TypeMCP composition
 
