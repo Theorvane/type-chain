@@ -27,9 +27,14 @@ test("publish readiness verifies an installed packed consumer", async () => {
   const manifest = JSON.parse(await readWorkflow("../package.json"));
   const script = await readWorkflow("../scripts/verify-packed-consumer.mjs");
 
+  const packJson = await readWorkflow("../scripts/pack-json.mjs");
+
   assert.match(manifest.scripts.verify, /verify:package/);
   assert.match(manifest.scripts["verify:publish"], /verify:consumer/);
-  assert.match(script, /npm pack/);
+  assert.match(script, /"npm", \["pack", "--json", "--ignore-scripts"\]/);
+  assert.match(script, /getPackedTarballFilename/);
+  assert.match(packJson, /Array\.isArray\(packed\)/);
+  assert.match(packJson, /Object\.values\(packed \?\? \{\}\)/);
   assert.match(script, /toGuardedLangChainTools/);
   assert.match(script, /buildGuardedAgent/);
   assert.match(script, /createTypeMcpAgent/);
