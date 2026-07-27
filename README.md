@@ -98,6 +98,7 @@ await agent.invoke({
 | `type-chain/langchain` / `toLangChainTools()` | Implemented | Converts decorated tools into standard LangChain structured tools. |
 | `type-chain/langchain` / `toGuardedLangChainTools()` | Implemented | Converts decorated tools into standard LangChain structured tools while invoking an application-supplied guard for declared policy metadata. |
 | `type-chain/agent` / `@Agent()` / `buildAgent()` | Implemented | Adds class-level prompt metadata and delegates decorated-tool agent construction to LangChain `createAgent()`. |
+| `type-chain/agent` / `buildGuardedAgent()` | Implemented | Builds a standard LangChain agent that invokes an application-supplied guard for declared policy metadata. |
 | `type-chain/typemcp` / `createTypeMcpLangChainTools()` | Implemented | Converts a TypeMCP-decorated server into LangChain tools in the current Node.js process. |
 | `type-chain/typemcp` / `createTypeMcpAgent()` | Implemented | Resolves TypeMCP tools, then delegates agent construction to LangChain. |
 | HTTP or stdio MCP hosting | Not provided | Use TypeMCP's transport hosts when an MCP server must communicate across processes. |
@@ -145,7 +146,7 @@ const guardedDefinitions = withToolPolicyGuard(new IssueTools(), async ({
 });
 ```
 
-This helper performs no default authorization, approval, retry, timeout, idempotency, audit, or redaction decision. For the optional LangChain boundary, import `toGuardedLangChainTools()` from `type-chain/langchain` with the same application guard; LangChain Core continues to own structured-input parsing and validation before the guard is invoked.
+This helper performs no default authorization, approval, retry, timeout, idempotency, audit, or redaction decision. For the optional LangChain boundary, import `toGuardedLangChainTools()` from `type-chain/langchain` with the same application guard; LangChain Core continues to own structured-input parsing and validation before the guard is invoked. For the direct agent boundary, import `buildGuardedAgent()` from `type-chain/agent`; it delegates to LangChain `createAgent()` with those guarded tools and leaves model lifecycle and runtime policy decisions to the application.
 
 ## In-process TypeMCP composition
 

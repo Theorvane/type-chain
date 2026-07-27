@@ -23,7 +23,7 @@ The bridge delegates schema validation, metadata interpretation, and resolver be
 
 ## Intended scope
 
-Agent construction is available through the optional `type-chain/agent` and `type-chain/typemcp` subpaths. The next layer is application-supplied runtime middleware or guards that make policy metadata enforceable.
+Agent construction is available through the optional `type-chain/agent` and `type-chain/typemcp` subpaths. `buildGuardedAgent()` composes the application's policy guard with the direct LangChain agent boundary. The next layer remains application-supplied runtime middleware or guards that make policy metadata enforceable.
 
 ## Non-goals
 
