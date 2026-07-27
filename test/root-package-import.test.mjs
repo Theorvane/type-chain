@@ -40,7 +40,10 @@ test("imports the metadata-only root package without optional peers", () => {
       ],
       { cwd: consumer, encoding: "utf8" },
     );
-    assert.equal(output.trim(), "Policy,Tool,getToolDefinitions");
+    assert.equal(
+      output.trim(),
+      "Policy,Tool,getToolDefinitions,withToolPolicyGuard",
+    );
   } finally {
     rmSync(consumer, { force: true, recursive: true });
   }
