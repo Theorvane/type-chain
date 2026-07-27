@@ -20,4 +20,10 @@ The npm version, annotated tag `v<version>`, and GitHub Release must resolve to 
 
 ## Verification
 
+Before a release, run `npm run verify:publish`. In addition to the build, package-artifact, and dry-run manifest checks, it packs the current source, installs that tarball into clean temporary consumers, and proves:
+
+- the root package imports with optional peers omitted;
+- `type-chain/langchain`, `type-chain/agent`, and `type-chain/typemcp` import with the declared peers installed; and
+- each public subpath exposes its documented runtime entrypoints.
+
 Poll `npm view type-chain@<version> version dist-tags --json`, install the exact registry artifact in a clean consumer, test every documented import/bin, and verify the annotated tag and GitHub Release target the same SHA.
