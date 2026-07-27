@@ -24,6 +24,7 @@ test("publish readiness verifies an installed packed consumer", async () => {
   assert.match(script, /toGuardedLangChainTools/);
   assert.match(script, /buildGuardedAgent/);
   assert.match(script, /createTypeMcpAgent/);
+  assert.match(script, /createGuardedTypeMcpAgent/);
   assert.match(script, /--omit=optional/);
 });
 
