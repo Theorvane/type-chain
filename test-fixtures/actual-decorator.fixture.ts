@@ -1,5 +1,5 @@
 import { Agent } from "../src/agent.js";
-import { getToolDefinitions, Tool } from "../src/index.js";
+import { getToolDefinitions, Policy, Tool } from "../src/index.js";
 
 export function createDecoratedFixture() {
   const schema = { type: "object" };
@@ -15,6 +15,16 @@ export function createDecoratedFixture() {
     })
     search(input: { readonly query: string }): string {
       return `${this.prefix}${input.query}`;
+    }
+
+    @Tool({
+      name: "actual_policy_search",
+      description: "Search using actual decorators with policy metadata.",
+      schema,
+    })
+    @Policy({ authorization: "required", retry: { maxAttempts: 2 } })
+    policySearch(input: { readonly query: string }): string {
+      return `${this.prefix}policy:${input.query}`;
     }
   }
 

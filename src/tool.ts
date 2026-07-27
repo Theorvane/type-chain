@@ -1,3 +1,5 @@
+import { getDeclaredToolPolicy, type ToolPolicy } from "./policy.js";
+
 type RuntimeSchema = object;
 // biome-ignore lint/suspicious/noExplicitAny: TypeScript's standard ClassMethodDecoratorContext requires an any-parameter callable constraint.
 type DecoratedMethod<This> = (this: This, ...args: any[]) => unknown;
@@ -14,10 +16,12 @@ export interface ToolDefinition {
   readonly name: string;
   readonly description: string;
   readonly schema: RuntimeSchema;
+  readonly policy: Readonly<ToolPolicy> | undefined;
   readonly invoke: (input: unknown) => unknown;
 }
 
 interface ToolRegistration {
+  readonly methodName: string | symbol;
   readonly options: Readonly<ToolOptions>;
   readonly invoke: (instance: object, input: unknown) => unknown;
 }
@@ -63,6 +67,7 @@ export function Tool(options: ToolOptions) {
 
       methods.add(context.name);
       registrations.push({
+        methodName: context.name,
         options: snapshot,
         invoke: (instance, input) => Reflect.apply(value, instance, [input]),
       });
@@ -81,6 +86,7 @@ export function getToolDefinitions(
 
     return registrations.map((registration) => {
       const { name } = registration.options;
+      const policy = getDeclaredToolPolicy(owner, registration.methodName);
 
       if (names.has(name)) {
         throw new Error(`Duplicate tool name registered: ${name}`);
@@ -91,6 +97,7 @@ export function getToolDefinitions(
         name,
         description: registration.options.description,
         schema: registration.options.schema,
+        policy,
         invoke: (input: unknown): unknown =>
           registration.invoke(instance, input),
       });
