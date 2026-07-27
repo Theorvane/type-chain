@@ -18,7 +18,7 @@ test("CI verifies both integration and release branches", async () => {
   );
   assert.match(
     workflow,
-    /actions\/setup-node@1e60f620b9541d3b22063fe4500f265f2bca9f9e/,
+    /actions\/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b/,
   );
   assert.doesNotMatch(workflow, /actions\/(checkout|setup-node)@v\d/);
 });
