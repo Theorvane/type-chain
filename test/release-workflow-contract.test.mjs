@@ -12,6 +12,10 @@ test("CI verifies both integration and release branches", async () => {
   assert.match(workflow, /pull_request:\n {4}branches: \[dev, main\]/);
   assert.match(workflow, /verify:\n {4}name: verify/);
   assert.match(workflow, /npm run verify:publish/);
+  assert.match(workflow, /npm-12-release-readiness:/);
+  assert.match(workflow, /name: npm 12 release readiness/);
+  assert.match(workflow, /npm install --global "npm@12\.0\.1"/);
+  assert.match(workflow, /npm audit --omit=dev --audit-level=low/);
   assert.match(
     workflow,
     /actions\/checkout@11bd71901bbe5b1630ceea73d27597364c9af683/,
