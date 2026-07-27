@@ -6,14 +6,34 @@ import {
   isInteropZodSchema,
 } from "@langchain/core/utils/types";
 
-import { getToolDefinitions } from "./tool.js";
+import { type ToolPolicyGuard, withToolPolicyGuard } from "./policy-guard.js";
+import { getToolDefinitions, type ToolDefinition } from "./tool.js";
 
 type StructuredInputSchema = object;
 type JsonSchema = object & { readonly type?: unknown };
 type ZodSchema = object & { readonly safeParse?: unknown };
 
+/** Converts decorated methods into standard LangChain structured tools. */
 export function toLangChainTools(instance: object): StructuredToolInterface[] {
-  return getToolDefinitions(instance).map((definition) => {
+  return adaptToolDefinitions(getToolDefinitions(instance));
+}
+
+/**
+ * Converts decorated methods into standard LangChain structured tools while
+ * calling an application-supplied guard before tools that declare @Policy().
+ * TypeChain supplies no default policy decision.
+ */
+export function toGuardedLangChainTools(
+  instance: object,
+  guard: ToolPolicyGuard,
+): StructuredToolInterface[] {
+  return adaptToolDefinitions(withToolPolicyGuard(instance, guard));
+}
+
+function adaptToolDefinitions(
+  definitions: readonly ToolDefinition[],
+): StructuredToolInterface[] {
+  return definitions.map((definition) => {
     if (!isStructuredInputSchema(definition.schema)) {
       throw new TypeError(
         `Tool ${definition.name} requires a structured object input schema for LangChain adaptation.`,
