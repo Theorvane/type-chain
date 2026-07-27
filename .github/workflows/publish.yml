@@ -30,19 +30,20 @@ jobs:
           fetch-depth: 0
           ref: ${{ inputs.release_sha }}
 
-      - name: Verify requested release is the current main tip
-        env:
-          GITHUB_SHA: ${{ inputs.release_sha }}
-        run: |
-          ACTUAL_MAIN="$(git ls-remote --exit-code "https://github.com/${{ github.repository }}.git" refs/heads/main | cut -f1)"
-          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          test "$ACTUAL_MAIN" = "$GITHUB_SHA"
-
       - name: Set up Node.js
         uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
+
+      - name: Verify requested release is the current main tip
+        env:
+          GITHUB_SHA: ${{ inputs.release_sha }}
+        run: |
+          set -o pipefail
+          ACTUAL_MAIN="$(curl --fail --silent --show-error --retry 3 --retry-all-errors "https://api.github.com/repos/${{ github.repository }}/git/ref/heads/main" | node --input-type=module -e 'let body = ""; process.stdin.setEncoding("utf8"); process.stdin.on("data", (chunk) => { body += chunk; }); process.stdin.on("end", () => { const sha = JSON.parse(body).object?.sha; if (!/^[0-9a-f]{40}$/.test(sha ?? "")) { process.exitCode = 1; return; } process.stdout.write(sha); });')"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$ACTUAL_MAIN" = "$GITHUB_SHA"
 
       - name: Install the npm CLI required for trusted publishing
         run: npm install --global "npm@>=11.5.1"
