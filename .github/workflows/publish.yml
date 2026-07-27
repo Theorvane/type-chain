@@ -34,7 +34,7 @@ jobs:
         env:
           GITHUB_SHA: ${{ inputs.release_sha }}
         run: |
-          git fetch origin main:refs/remotes/origin/main
+          git fetch origin +refs/heads/main:refs/remotes/origin/main
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           test "$(git rev-parse origin/main)" = "$GITHUB_SHA"
 
