@@ -55,6 +55,8 @@ test("release workflow uses OIDC and state-aware publish before tag/release", as
   assert.match(workflow, /npm run verify:publish/);
   assert.match(workflow, /node scripts\/publish-release\.mjs/);
   assert.match(workflow, /TYPE_CHAIN_RELEASE_APPROVED: "true"/);
+  assert.match(workflow, /npm install --global "npm@>=11\.5\.1"/);
+  assert.doesNotMatch(workflow, /npm install --global npm@>=/);
   assert.match(workflow, /GITHUB_SHA: \$\{\{ github\.sha \}\}/);
   assert.doesNotMatch(workflow, /NPM_TOKEN/);
   assert.match(script, /"npm", \["publish"/);
