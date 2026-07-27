@@ -1,8 +1,9 @@
-import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+
+import { getPackedTarballFilename } from "./pack-json.mjs";
 
 const packageRoot = process.cwd();
 const manifest = JSON.parse(readFileSync("package.json", "utf8"));
@@ -47,9 +48,7 @@ function verifyImport(consumer, source) {
 try {
   run("npm", ["run", "build"]);
   const packed = JSON.parse(run("npm", ["pack", "--json", "--ignore-scripts"]));
-  const filename = packed[0]?.filename;
-
-  assert.equal(typeof filename, "string", "npm pack did not return a tarball.");
+  const filename = getPackedTarballFilename(packed);
   tarballPath = resolve(packageRoot, filename);
 
   const rootConsumer = createConsumer("type-chain-root-consumer");

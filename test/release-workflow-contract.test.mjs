@@ -12,6 +12,10 @@ test("CI verifies both integration and release branches", async () => {
   assert.match(workflow, /pull_request:\n {4}branches: \[dev, main\]/);
   assert.match(workflow, /verify:\n {4}name: verify/);
   assert.match(workflow, /npm run verify:publish/);
+  assert.match(workflow, /npm-12-release-readiness:/);
+  assert.match(workflow, /name: npm 12 release readiness/);
+  assert.match(workflow, /npm install --global "npm@12\.0\.1"/);
+  assert.match(workflow, /npm audit --omit=dev --audit-level=low/);
   assert.match(
     workflow,
     /actions\/checkout@11bd71901bbe5b1630ceea73d27597364c9af683/,
@@ -27,9 +31,14 @@ test("publish readiness verifies an installed packed consumer", async () => {
   const manifest = JSON.parse(await readWorkflow("../package.json"));
   const script = await readWorkflow("../scripts/verify-packed-consumer.mjs");
 
+  const packJson = await readWorkflow("../scripts/pack-json.mjs");
+
   assert.match(manifest.scripts.verify, /verify:package/);
   assert.match(manifest.scripts["verify:publish"], /verify:consumer/);
-  assert.match(script, /npm pack/);
+  assert.match(script, /"npm", \["pack", "--json", "--ignore-scripts"\]/);
+  assert.match(script, /getPackedTarballFilename/);
+  assert.match(packJson, /Array\.isArray\(packed\)/);
+  assert.match(packJson, /Object\.values\(packed \?\? \{\}\)/);
   assert.match(script, /toGuardedLangChainTools/);
   assert.match(script, /buildGuardedAgent/);
   assert.match(script, /createTypeMcpAgent/);
@@ -58,7 +67,15 @@ test("release workflow uses a token-free OIDC-only exact-SHA publication path", 
   const workflow = await readWorkflow("../.github/workflows/publish.yml");
   const script = await readWorkflow("../scripts/publish-release.mjs");
 
-  assert.match(workflow, /push:\n {4}branches: \[main\]/);
+  assert.match(workflow, /workflow_dispatch:/);
+  assert.match(workflow, /release_sha:/);
+  assert.match(workflow, /confirm_publish:/);
+  assert.doesNotMatch(workflow, /push:\n {4}branches: \[main\]/);
+  assert.match(workflow, /inputs\.confirm_publish == 'publish'/);
+  assert.match(workflow, /ref: \$\{\{ inputs\.release_sha \}\}/);
+  assert.match(workflow, /GITHUB_SHA: \$\{\{ inputs\.release_sha \}\}/);
+  assert.match(workflow, /git fetch origin main/);
+  assert.match(workflow, /git rev-parse origin\/main/);
   assert.match(workflow, /contents: read/);
   assert.match(workflow, /id-token: write/);
   assert.match(workflow, /environment: npm/);
@@ -67,7 +84,7 @@ test("release workflow uses a token-free OIDC-only exact-SHA publication path", 
   assert.match(workflow, /TYPE_CHAIN_RELEASE_APPROVED: "true"/);
   assert.match(workflow, /npm install --global "npm@>=11\.5\.1"/);
   assert.doesNotMatch(workflow, /npm install --global npm@>=/);
-  assert.match(workflow, /GITHUB_SHA: \$\{\{ github\.sha \}\}/);
+  assert.match(workflow, /GITHUB_SHA: \$\{\{ inputs\.release_sha \}\}/);
   assert.doesNotMatch(workflow, /(NPM_TOKEN|GITHUB_TOKEN|contents: write)/);
   assert.match(script, /"git", \["rev-parse", "HEAD"\]/);
   assert.match(script, /checkedOutHead !== sha/);
