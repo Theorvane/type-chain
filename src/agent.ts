@@ -1,6 +1,7 @@
 import { createAgent } from "langchain";
 
-import { toLangChainTools } from "./langchain.js";
+import { toGuardedLangChainTools, toLangChainTools } from "./langchain.js";
+import type { ToolPolicyGuard } from "./policy-guard.js";
 
 type AgentClass = abstract new (...args: never[]) => object;
 type AgentModel = Parameters<typeof createAgent>[0]["model"];
@@ -11,6 +12,10 @@ export interface AgentOptions {
 
 export interface BuildAgentOptions {
   readonly model: AgentModel;
+}
+
+export interface BuildGuardedAgentOptions extends BuildAgentOptions {
+  readonly guard: ToolPolicyGuard;
 }
 
 const agentRegistrations = new WeakMap<object, Readonly<AgentOptions>>();
@@ -33,11 +38,38 @@ export function Agent(options: AgentOptions = {}) {
 }
 
 export function buildAgent(instance: object, options: BuildAgentOptions) {
+  return createDecoratedAgent(
+    instance,
+    options.model,
+    toLangChainTools(instance),
+  );
+}
+
+/**
+ * Builds a LangChain agent whose @Policy()-decorated tools invoke an
+ * application-supplied guard. TypeChain supplies no default policy decision.
+ */
+export function buildGuardedAgent(
+  instance: object,
+  options: BuildGuardedAgentOptions,
+) {
+  return createDecoratedAgent(
+    instance,
+    options.model,
+    toGuardedLangChainTools(instance, options.guard),
+  );
+}
+
+function createDecoratedAgent(
+  instance: object,
+  model: AgentModel,
+  tools: ReturnType<typeof toLangChainTools>,
+) {
   const agentOptions = getAgentOptions(instance);
 
   return createAgent({
-    model: options.model,
-    tools: toLangChainTools(instance),
+    model,
+    tools,
     ...(agentOptions.systemPrompt === undefined
       ? {}
       : { systemPrompt: agentOptions.systemPrompt }),
