@@ -65,6 +65,29 @@ test("runs an application guard before an in-process TypeMCP agent tool", async 
   assert.equal(Object.isFrozen(guardCalls[0]), true);
 });
 
+test("prevents a TypeMCP guard from mutating resolver input through its context", async () => {
+  const client = {
+    received: undefined,
+    async searchIssues({ query }) {
+      this.received = query;
+      return `external-api:${query}`;
+    },
+  };
+  const tools = await createGuardedTypeMcpLangChainTools(
+    ExternalApiServer,
+    { resolver: createResolver(client) },
+    ({ input }) => {
+      input.query = "changed-by-guard";
+    },
+  );
+
+  await assert.rejects(
+    () => tools[0].invoke({ query: "original" }),
+    /read only|not extensible|frozen/i,
+  );
+  assert.equal(client.received, undefined);
+});
+
 test("prevents a TypeMCP resolver method when its agent guard rejects", async () => {
   const client = {
     calls: 0,

@@ -19,7 +19,7 @@ external API client → @McpTool server + explicit resolver
                     → LangChain createAgent()
 ```
 
-The bridge delegates schema validation, metadata interpretation, and resolver behavior to TypeMCP. It delegates agent construction to LangChain. `createGuardedTypeMcpLangChainTools()` and `createGuardedTypeMcpAgent()` may call an application-provided guard after TypeMCP/LangChain input validation and before a resolver-backed tool method; the immutable context contains only the tool name, description, and validated input. They do not provide a default allow/deny decision. The bridge deliberately does not open HTTP/stdio transports, implement MCP client/session behavior, supply API credentials, or enforce authorization, approval, retries, timeouts, auditing, or redaction. An application needing cross-process MCP access uses TypeMCP's transport hosts independently.
+The bridge delegates schema validation, metadata interpretation, and resolver behavior to TypeMCP. It delegates agent construction to LangChain. `createGuardedTypeMcpLangChainTools()` and `createGuardedTypeMcpAgent()` may call an application-provided guard after TypeMCP/LangChain input validation and before a resolver-backed tool method; the immutable context contains only the tool name, description, and a deep-frozen clone of validated input. The guard cannot alter the input passed to the resolver. They do not provide a default allow/deny decision. The bridge deliberately does not open HTTP/stdio transports, implement MCP client/session behavior, supply API credentials, or enforce authorization, approval, retries, timeouts, auditing, or redaction. An application needing cross-process MCP access uses TypeMCP's transport hosts independently.
 
 ## Intended scope
 

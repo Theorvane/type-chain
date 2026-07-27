@@ -64,6 +64,15 @@ export async function createGuardedTypeMcpLangChainTools<T extends object>(
   return tools.map((source) => guardTypeMcpTool(source, guard));
 }
 
+function deepFreeze<T>(value: T): Readonly<T> {
+  if (value !== null && typeof value === "object" && !Object.isFrozen(value)) {
+    for (const property of Object.values(value)) deepFreeze(property);
+    Object.freeze(value);
+  }
+
+  return value;
+}
+
 function guardTypeMcpTool(
   source: DynamicStructuredTool,
   guard: TypeMcpToolGuard,
@@ -74,7 +83,7 @@ function guardTypeMcpTool(
         Object.freeze({
           name: source.name,
           description: source.description,
-          input,
+          input: deepFreeze(structuredClone(input)),
         }),
       );
 
