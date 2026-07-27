@@ -34,7 +34,7 @@ jobs:
         env:
           GITHUB_SHA: ${{ inputs.release_sha }}
         run: |
-          ACTUAL_MAIN="$(git ls-remote --exit-code origin refs/heads/main | cut -f1)"
+          ACTUAL_MAIN="$(git ls-remote --exit-code "https://github.com/${{ github.repository }}.git" refs/heads/main | cut -f1)"
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           test "$ACTUAL_MAIN" = "$GITHUB_SHA"
 
