@@ -76,9 +76,17 @@ test("release workflow uses a token-free OIDC-only exact-SHA publication path", 
   assert.match(workflow, /GITHUB_SHA: \$\{\{ inputs\.release_sha \}\}/);
   assert.match(
     workflow,
-    /ACTUAL_MAIN="\$\(git ls-remote --exit-code "https:\/\/github\.com\/\$\{\{ github\.repository \}\}\.git" refs\/heads\/main \| cut -f1\)"/,
+    /curl --fail --silent --show-error --retry 3 --retry-all-errors "https:\/\/api\.github\.com\/repos\/\$\{\{ github\.repository \}\}\/git\/ref\/heads\/main"/,
   );
-  assert.doesNotMatch(workflow, /git ls-remote --exit-code origin/);
+  assert.match(workflow, /node --input-type=module -e/);
+  assert.match(workflow, /set -o pipefail/);
+  assert.ok(
+    workflow.indexOf("name: Set up Node.js") <
+      workflow.indexOf(
+        "name: Verify requested release is the current main tip",
+      ),
+  );
+  assert.doesNotMatch(workflow, /git ls-remote/);
   assert.doesNotMatch(workflow, /git fetch origin/);
   assert.doesNotMatch(workflow, /git rev-parse origin\/main/);
   assert.match(workflow, /test "\$ACTUAL_MAIN" = "\$GITHUB_SHA"/);
