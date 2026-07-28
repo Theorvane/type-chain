@@ -1,6 +1,6 @@
 # npm Release Guide
 
-The intended public package is **`@theorvane/type-chain@0.1.0`**. It is **not yet published**: this document describes the reviewed release path and must not be read as registry-install evidence.
+The intended public package is **`@theorvane/type-chain`**, published to npm via GitHub Actions OIDC Trusted Publishing. The first version `0.1.0` was published on 2026-07-28.
 
 ## Publication prerequisites
 
@@ -45,7 +45,7 @@ Before publishing, `npm run verify:publish` builds, inspects the package archive
 After a successful publication, poll:
 
 ```sh
-npm view @theorvane/type-chain@0.1.0 version dist-tags --json
+npm view @theorvane/type-chain version dist-tags --json
 ```
 
 Then install that exact registry version into a fresh consumer and verify every documented import. A tag or GitHub Release, if desired, is a separate reviewed post-publication operation and must resolve to the verified `main` SHA.

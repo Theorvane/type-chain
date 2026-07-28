@@ -52,15 +52,16 @@ test("public release metadata and documentation use the scoped first-release con
   const releaseGuide = await readWorkflow("../docs/release.md");
 
   assert.equal(manifest.name, "@theorvane/type-chain");
-  assert.equal(manifest.version, "0.1.0");
+  assert.equal(manifest.version, "0.1.1");
   assert.equal(manifest.publishConfig.access, "public");
-  assert.match(readme, /After registry publication is verified/);
-  assert.match(readme, /not yet published/i);
-  assert.doesNotMatch(readme, /Install the published package/);
+  assert.match(readme, /Install from npm/);
   assert.match(readme, /npm install @theorvane\/type-chain/);
   assert.match(readme, /from "@theorvane\/type-chain/);
-  assert.match(releaseGuide, /@theorvane\/type-chain@0\.1\.0/);
-  assert.match(releaseGuide, /not yet published/i);
+  assert.match(
+    releaseGuide,
+    /published to npm via GitHub Actions OIDC Trusted Publishing/,
+  );
+  assert.match(releaseGuide, /0\.1\.0/);
 });
 
 test("release workflow uses a token-free OIDC-only exact-SHA publication path", async () => {

@@ -8,28 +8,31 @@
   [![Node](https://img.shields.io/badge/node-%E2%89%A520-339933?style=flat-square)](package.json)
   [![TypeScript](https://img.shields.io/badge/TypeScript-Stage%203%20decorators-3178C6?style=flat-square)](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-0.html)
   [![LangChain](https://img.shields.io/badge/LangChain-JS%20composition-1C3C3C?style=flat-square)](https://js.langchain.com/)
+  [![npm](https://img.shields.io/npm/v/%40theorvane%2Ftype-chain?style=flat-square&label=npm)](https://www.npmjs.com/package/@theorvane/type-chain)
   [![License](https://img.shields.io/badge/license-MIT-111827?style=flat-square)](LICENSE)
 </div>
 
-> **Unreleased development branch:** TypeChain is private and has **no npm publication**. The implemented surfaces below are available from this repository's `dev` branch only; package ownership and release authorization have not been established.
->
 > **Runtime boundary:** TypeChain records declarations and composes standard LangChain tools and agents. Model selection, credentials, authorization, approvals, retries, timeouts, persistence, redaction, and audit policy remain application responsibilities.
 
 TypeChain keeps explicit runtime schemas and LangChain contracts visible while making TypeScript tool and agent declarations easier to author. It supports standard (Stage 3) decorators—without legacy reflection metadata—and delegates execution semantics to LangChain and, when used, TypeMCP.
 
 ## Fast path
 
-1. **After registry publication is verified**, install the package: `npm install @theorvane/type-chain`. Until then, use the repository-local workflow below.
+1. Install from npm: `npm install @theorvane/type-chain`.
 2. Enable standard TypeScript decorators (`"experimentalDecorators": false`) and compile for a modern Node.js target.
 3. Import `toLangChainTools()` from `@theorvane/type-chain/langchain` to create standard LangChain tools.
 4. Import `@Agent()` and `buildAgent()` from `@theorvane/type-chain/agent` when the application owns a LangChain model and agent lifecycle.
 5. Use `@theorvane/type-chain/typemcp` only for in-process composition of a TypeMCP-decorated server; it does not open an MCP transport.
 
-> **Release status:** the first public release is prepared as `@theorvane/type-chain@0.1.0` but is **not yet published**. Until registry verification succeeds, use the repository-local workflow below.
-
 ## Development setup
 
-TypeChain requires **Node.js 20 or later**, ESM-aware TypeScript configuration, and standard TypeScript decorators. The repository currently provides the unreleased development package through its local workspace.
+TypeChain requires **Node.js 20 or later**, ESM-aware TypeScript configuration, and standard TypeScript decorators.
+
+```bash
+npm install @theorvane/type-chain
+```
+
+To contribute to the library itself, clone the repository and use the `dev` integration branch:
 
 ```bash
 git clone https://github.com/Theorvane/type-chain.git
@@ -106,7 +109,7 @@ await agent.invoke({
 | `@theorvane/type-chain/typemcp` / `createGuardedTypeMcpAgent()` | Implemented | Delegates guarded in-process TypeMCP tools to LangChain while the application decides whether each invocation proceeds. |
 | HTTP or stdio MCP hosting | Not provided | Use TypeMCP's transport hosts when an MCP server must communicate across processes. |
 | Runtime policy enforcement | Not provided | The application must enforce authorization, approval, retries, timeouts, audit, redaction, and persistence. |
-| npm distribution | Release prepared | `@theorvane/type-chain@0.1.0` is prepared for trusted publishing but is not yet available from npm. |
+| npm distribution | Published | `@theorvane/type-chain` is available from npm with Trusted Publishing via GitHub Actions OIDC. |
 
 ### Schema contract
 
