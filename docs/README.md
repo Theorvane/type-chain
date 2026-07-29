@@ -13,6 +13,8 @@ TypeChain is a decorator-first authoring layer for typed LangChain JS tools and 
 | **Reuse with LangChain** in an existing composition | [LangChain integration](guides/langchain-integration.md) | `@theorvane/type-chain/langchain` |
 | **Build an agent** from a caller-supplied model | [Agent builder](guides/agent-builder.md) | `@theorvane/type-chain/agent` |
 | **Bridge TypeMCP in process** | [TypeMCP bridge](guides/typemcp-bridge.md) | `@theorvane/type-chain/typemcp` |
+| Start a typed Petstore tool | [Petstore TypeChain foundation](guides/petstore-typechain-foundation.md) | root declarations and immutable definitions |
+| Record policy and choose one integration | [Petstore policy and composition](guides/petstore-policy-and-composition.md) | application guard plus selected optional subpath |
 | Follow one compact catalog example | [Petstore walkthrough](guides/petstore-walkthrough.md) | root package plus selected optional subpath |
 | Inspect every export and exclusion | [Decorator API contract](api/decorator-api.md) | semver-governed API reference |
 
@@ -29,6 +31,8 @@ Read [core concepts](guides/core-concepts.md) first. The [Petstore walkthrough](
 
 ### Start
 
+- [Petstore TypeChain foundation](guides/petstore-typechain-foundation.md) — start a typed tool in a strict workspace and inspect its immutable definition.
+- [Petstore policy and composition](guides/petstore-policy-and-composition.md) — record policy intent, application guard ownership, and one optional route.
 - [Getting started](guides/getting-started.md) — install, configure Stage 3 decorators, and declare a first tool.
 - [Core concepts](guides/core-concepts.md) — metadata, runtime schemas, policy intent, optional subpaths, and ownership boundaries.
 - [Petstore walkthrough](guides/petstore-walkthrough.md) — a compact catalog flow from tool declaration to selected composition.

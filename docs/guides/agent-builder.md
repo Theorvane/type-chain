@@ -11,7 +11,7 @@ The published `@theorvane/type-chain@0.1.1` `/agent` subpath provides a narrow d
 ## Install
 
 ```bash
-npm install @theorvane/type-chain @langchain/core langchain zod
+npm install @theorvane/type-chain@0.1.1 @langchain/core langchain zod
 ```
 
 `/agent` is optional. Import the root package alone when tool metadata is sufficient.
