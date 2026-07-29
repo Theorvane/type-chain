@@ -71,6 +71,8 @@ const tools = toLangChainTools(new CatalogTools());
 
 ## Next steps
 
+- [Core concepts](./core-concepts.md) — metadata, immutable definitions, policy intent, and optional integration boundaries.
+- [Petstore walkthrough](./petstore-walkthrough.md) — one catalog tool from declaration through a selected composition boundary.
 - [Tools and definitions](./tools-and-definitions.md) — the `@Tool()` contract and `getToolDefinitions()`.
 - [Policy](./policy.md) — declarative `@Policy()` intent and application-owned guards.
 - [LangChain integration](./langchain-integration.md) — standard tools and agent composition.
