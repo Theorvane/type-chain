@@ -26,6 +26,8 @@ test("reference-first TypeChain documentation routes Petstore readers without cl
   assert.match(content, /find_product/);
   assert.match(content, /@Tool\(\)/);
   assert.match(content, /@Policy\(\)/);
+  assert.match(content, /export class PetstoreAdminTools/);
+  assert.match(content, /declare const applicationOwnedModel/);
   assert.match(
     content,
     /models, credentials, policy enforcement, state, hosting, deployment, and cross-process MCP transport/,

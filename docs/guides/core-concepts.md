@@ -46,16 +46,19 @@ The returned array and definitions are frozen. Each definition's `invoke` is bou
 Apply `@Policy()` to record requirements for a tool:
 
 ```ts
+import { z } from "zod";
 import { Policy, Tool } from "@theorvane/type-chain";
 
-@Policy({ authorization: "required", audit: "required" })
-@Tool({
-  name: "update_product",
-  description: "Update a Petstore product.",
-  schema: { type: "object" },
-})
-updateProduct(input: unknown) {
-  return input;
+export class PetstoreAdminTools {
+  @Policy({ authorization: "required", audit: "required" })
+  @Tool({
+    name: "update_product",
+    description: "Update a Petstore product.",
+    schema: z.object({ sku: z.string().min(1) }),
+  })
+  updateProduct({ sku }: { readonly sku: string }) {
+    return { sku, updated: true };
+  }
 }
 ```
 

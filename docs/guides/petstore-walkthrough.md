@@ -60,14 +60,16 @@ A read-only lookup does not need policy metadata in this example. For a state-ch
 ```ts
 import { Policy, Tool } from "@theorvane/type-chain";
 
-@Policy({ authorization: "required", audit: "required" })
-@Tool({
-  name: "update_product",
-  description: "Update a Petstore product.",
-  schema: z.object({ sku: z.string().min(1) }),
-})
-updateProduct({ sku }: { readonly sku: string }) {
-  return { sku, updated: true };
+export class PetstoreAdminTools {
+  @Policy({ authorization: "required", audit: "required" })
+  @Tool({
+    name: "update_product",
+    description: "Update a Petstore product.",
+    schema: z.object({ sku: z.string().min(1) }),
+  })
+  updateProduct({ sku }: { readonly sku: string }) {
+    return { sku, updated: true };
+  }
 }
 ```
 
@@ -105,12 +107,15 @@ import { PetstoreTools } from "./petstore-tools.js";
 @Agent({ systemPrompt: "Use the Petstore tool for product lookups." })
 class PetstoreAgent extends PetstoreTools {}
 
+// Obtain this from your application's chosen LangChain model integration.
+declare const applicationOwnedModel: Parameters<typeof buildAgent>[1]["model"];
+
 export const agent = buildAgent(new PetstoreAgent(), {
-  model: yourApplicationModel,
+  model: applicationOwnedModel,
 });
 ```
 
-`buildAgent()` delegates to LangChain's `createAgent()`. The caller supplies `yourApplicationModel`, provider credentials, runtime policy, state, errors, and deployment. This is a convenience bridge, not a hosted agent platform.
+`buildAgent()` delegates to LangChain's `createAgent()`. The caller supplies `applicationOwnedModel`, provider credentials, runtime policy, state, errors, and deployment. This is a convenience bridge, not a hosted agent platform.
 
 ### Bridge a TypeMCP server in process
 
