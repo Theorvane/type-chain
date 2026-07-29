@@ -1,25 +1,49 @@
 # LangChain integration
 
-`@theorvane/type-chain@0.1.1` exposes a dedicated `@theorvane/type-chain/langchain` subpath that turns decorated methods into standard LangChain structured tools. LangChain owns schema parsing and validation; TypeChain preserves your explicit name, description, schema, and receiver-bound invocation.
+`@theorvane/type-chain@0.1.1` exposes a dedicated `/langchain` subpath that turns decorated methods into standard LangChain structured tools. LangChain owns schema parsing and validation; TypeChain preserves the explicit name, description, schema, and receiver-bound invocation.
 
-## Install peers
+## Prerequisites
 
-Install TypeChain alongside the LangChain packages your application uses:
+- Node.js 20 or later
+- TypeScript with standard (Stage 3) decorators; do **not** enable `experimentalDecorators`
+- An application-owned model and agent lifecycle if you later compose these tools into an agent
+
+## Install
 
 ```bash
 npm install @theorvane/type-chain @langchain/core langchain zod
 ```
 
-The root metadata import remains independent of these optional peers. Import the `/langchain` subpath only where the application needs this adapter.
+The root package remains independent of optional peers. Import `/langchain` only where the application needs this adapter.
 
-## Adapt decorated tools
+## Configure TypeScript
+
+Create `tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2022", "ESNext.Decorators"],
+    "strict": true,
+    "verbatimModuleSyntax": true
+  }
+}
+```
+
+Leave `experimentalDecorators` off.
+
+## Adapt a decorated tool
+
+Create `src/search-tools.ts`:
 
 ```ts
 import { z } from "zod";
 import { Tool } from "@theorvane/type-chain";
-import { toLangChainTools } from "@theorvane/type-chain/langchain";
 
-class SearchTools {
+export class SearchTools {
   @Tool({
     name: "search_catalog",
     description: "Search the product catalog.",
@@ -29,45 +53,29 @@ class SearchTools {
     return [{ id: "p_1", title: `Result for ${query}` }];
   }
 }
-
-const tools = toLangChainTools(new SearchTools());
 ```
 
-`toLangChainTools()` accepts structured object schemas supported by LangChain's `tool()` factory. For Zod schemas, refinements and transforms are accepted when the input schema remains a structured object. For JSON Schema, the root schema must declare `type: "object"`.
-
-## Compose an application-owned agent
-
-Use the resulting tools with the LangChain model, agent lifecycle, state, memory, persistence, and deployment controls that your application owns.
+Create `src/langchain-tools.ts`:
 
 ```ts
-import { createAgent } from "langchain";
+import { toLangChainTools } from "@theorvane/type-chain/langchain";
+import { SearchTools } from "./search-tools.js";
 
-const agent = createAgent({
-  model: yourApplicationModel,
-  tools,
-  systemPrompt: "Use catalog tools only when a product lookup is needed.",
-});
+export const tools = toLangChainTools(new SearchTools());
 ```
 
-TypeChain does not select a model, configure provider credentials, create a LangGraph topology, hold state, persist conversations, or host an endpoint.
+`toLangChainTools()` accepts structured object schemas supported by LangChain's `tool()` factory. For JSON Schema, the root schema must be `type: "object"`.
 
-## Guard policy-decorated tools
+## Expected behavior
 
-When a tool declares `@Policy()`, compose the application-owned guard before adaptation:
+`tools` contains a standard LangChain structured tool named `search_catalog`. LangChain validates structured input before receiver-bound invocation; a model, agent, graph, endpoint, and state are not created.
 
-```ts
-import { toGuardedLangChainTools } from "@theorvane/type-chain/langchain";
+## Responsibility boundary
 
-const guardedTools = toGuardedLangChainTools(new SearchTools(), async ({ definition, policy, input }) => {
-  await enforceApplicationPolicy({ tool: definition.name, policy, input });
-});
-```
+TypeChain supplies adapter-generated tools. Your application owns model selection, provider credentials, agent and graph topology, state, streaming, policy enforcement, persistence, hosting, and deployment.
 
-The guard may throw or reject to stop a policy-decorated invocation. No default policy decision exists in TypeChain.
+## Next steps
 
-## Related guides
-
-- [Tools and definitions](./tools-and-definitions.md)
-- [Declarative policy and application-owned guards](./policy.md)
-- [Agent builder](./agent-builder.md)
-- [TypeMCP in-process bridge](./typemcp-bridge.md)
+- [Policy and guards](./policy.md) — use `toGuardedLangChainTools()` with an application-owned guard.
+- [Agent builder](./agent-builder.md) — build a small agent from an application-supplied model.
+- [TypeMCP bridge](./typemcp-bridge.md) — adapt a TypeMCP server only when both sides run in one process.

@@ -1,16 +1,49 @@
 # Declarative policy and application-owned guards
 
-The published `@theorvane/type-chain@0.1.1` package lets a tool declare policy intent. It does not supply a default allow/deny decision or enforce authorization, approvals, retries, timeouts, idempotency, auditing, or redaction.
+The published `@theorvane/type-chain@0.1.1` package lets a tool declare policy intent. It does not provide a default allow/deny decision or enforce authorization, approvals, retries, timeouts, idempotency, auditing, or redaction.
 
-## Declare intent with @Policy()
+## Prerequisites
 
-Apply `@Policy()` to the same public instance method as `@Tool()`.
+- Node.js 20 or later
+- TypeScript with standard (Stage 3) decorators; do **not** enable `experimentalDecorators`
+- A concrete application policy function that can reject before a domain method runs
+
+## Install
+
+```bash
+npm install @theorvane/type-chain zod
+```
+
+Use the `/langchain` optional subpath only if the application later adapts guarded tools to LangChain.
+
+## Configure TypeScript
+
+Create `tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2022", "ESNext.Decorators"],
+    "strict": true,
+    "verbatimModuleSyntax": true
+  }
+}
+```
+
+Leave `experimentalDecorators` off.
+
+## Declare policy intent
+
+Create `src/billing-tools.ts`:
 
 ```ts
 import { z } from "zod";
 import { Policy, Tool } from "@theorvane/type-chain";
 
-class BillingTools {
+export class BillingTools {
   @Policy({ authorization: "required", approval: "required", audit: "required" })
   @Tool({
     name: "issue_refund",
@@ -23,52 +56,36 @@ class BillingTools {
 }
 ```
 
-The supported intent fields are:
+The supported fields are `authorization`, `approval`, `audit`, `idempotency`, `timeoutMs`, and `retry`. A policy object needs at least one supported field; TypeChain freezes the recorded snapshot.
 
-| Field | Accepted value |
-| --- | --- |
-| `authorization` | `"required"` |
-| `approval` | `"required"` |
-| `audit` | `"required"` |
-| `idempotency` | `"required"` |
-| `timeoutMs` | positive safe integer |
-| `retry` | `{ maxAttempts: positive safe integer }` |
+## Enforce it in application code
 
-The policy object must contain at least one supported field. TypeChain freezes the recorded snapshot so later mutation cannot silently change a declared tool policy.
-
-## Enforce it in your application
-
-Use `withToolPolicyGuard(instance, guard)` to return immutable definitions that invoke your guard before a policy-decorated tool runs.
+Create `src/guarded-billing-tools.ts`:
 
 ```ts
 import { withToolPolicyGuard } from "@theorvane/type-chain";
+import { BillingTools } from "./billing-tools.js";
 
 const billing = new BillingTools();
-const guarded = withToolPolicyGuard(billing, async ({ definition, policy, input }) => {
+export const guarded = withToolPolicyGuard(billing, async ({ definition, policy, input }) => {
   await authorizeCurrentUser({ action: definition.name, input });
   await requireApprovalIfNeeded(policy, input);
   await appendAuditRecord({ tool: definition.name, policy, input });
 });
-
-await guarded[0]?.invoke({ invoiceId: "inv_123", amount: 25 });
 ```
 
-Throw or reject from the guard to prevent invocation. Tools with no declared `@Policy()` preserve direct invocation behavior. TypeChain does not interpret a policy field or add fallback behavior when the application has not supplied a guard.
+Throw or reject from the application guard to prevent invocation. Tools without declared `@Policy()` keep direct invocation behavior.
 
-## Use guarded LangChain tools
+## Expected behavior
 
-For LangChain, import the dedicated adapter and pass the same kind of guard:
+`guarded` exposes an immutable definition for `issue_refund`; invoking it calls the application guard before `BillingTools.issueRefund`. A rejected guard prevents the method body from running.
 
-```ts
-import { toGuardedLangChainTools } from "@theorvane/type-chain/langchain";
+## Responsibility boundary
 
-const tools = toGuardedLangChainTools(billing, async (context) => {
-  await authorizeCurrentUser({ action: context.definition.name, input: context.input });
-});
-```
+`@Policy()` is metadata, not security. Your application owns identities, authorization, approval UX, rate limits, retries, timeouts, idempotency keys, audit destinations, redaction, errors, persistence, hosting, and deployment.
 
-LangChain Core validates structured inputs before invoking the decorated tool. The application-supplied guard runs before the receiver-bound method executes.
+## Next steps
 
-## Boundary
-
-A declared `@Policy()` is metadata, not security. Your application owns identities, authorization, approval UX, rate limits, retries, timeouts, idempotency keys, audit destinations, redaction, error handling, and deployment controls. Treat the guard as one integration point inside those application-owned controls, not as a replacement for them.
+- [LangChain integration](./langchain-integration.md) — use `toGuardedLangChainTools()` at the adapter boundary.
+- [Agent builder](./agent-builder.md) — supply a guard while building a narrow LangChain agent.
+- [Petstore walkthrough](./petstore-walkthrough.md) — apply the pattern to a state-changing catalog tool.
