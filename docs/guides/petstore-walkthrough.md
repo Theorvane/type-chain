@@ -1,6 +1,6 @@
 # Petstore walkthrough: typed tools at the boundary you own
 
-This walkthrough uses one Petstore catalog tool to show the published [`@theorvane/type-chain@0.1.1`](https://www.npmjs.com/package/@theorvane/type-chain) flow: declare an explicit tool, optionally attach policy intent, then choose LangChain, agent, or in-process TypeMCP composition.
+This walkthrough uses one Petstore catalog tool to show the published [`@theorvane/type-chain@0.1.1`](https://www.npmjs.com/package/@theorvane/type-chain) flow: declare an explicit tool, optionally attach policy intent, then choose a LangChain, agent, or in-process TypeMCP boundary.
 
 > **What this does not do:** TypeChain does not choose models, credentials, policy enforcement, state, hosting, deployment, or cross-process MCP transport. Your application supplies those decisions.
 
@@ -55,9 +55,10 @@ export class PetstoreTools {
 
 ## 2. Record policy intent only when the action needs it
 
-A read-only lookup does not need policy metadata in this example. For a state-changing Petstore operation, stack `@Policy()` on the same method:
+A read-only lookup does not need policy metadata in this example. For a state-changing Petstore operation, create `src/petstore-admin-tools.ts`:
 
 ```ts
+import { z } from "zod";
 import { Policy, Tool } from "@theorvane/type-chain";
 
 export class PetstoreAdminTools {
@@ -73,7 +74,7 @@ export class PetstoreAdminTools {
 }
 ```
 
-This records intent. It does not enforce authorization or audit automatically. Supply a reviewed application guard that can reject before a policy-decorated tool executes; see [Policy and guards](policy.md).
+This records intent. It does not enforce authorization or write an audit event automatically. Supply a reviewed application guard that can reject before a policy-decorated tool executes; see [Policy and guards](policy.md).
 
 ## 3. Choose one composition boundary
 
@@ -125,9 +126,39 @@ When a TypeMCP-decorated Petstore server and the LangChain application live in t
 npm install @theorvane/type-chain @theorvane/type-mcp @langchain/core langchain zod
 ```
 
+Create `src/petstore-server.ts`:
+
+```ts
+import { z } from "zod";
+import { McpServer, McpTool } from "@theorvane/type-mcp";
+
+type PetstoreClient = {
+  findBySku(sku: string): Promise<unknown>;
+};
+
+@McpServer({ name: "petstore", version: "1.0.0" })
+export class PetstoreServer {
+  constructor(private readonly client: PetstoreClient) {}
+
+  @McpTool({
+    name: "find-product",
+    description: "Find a Petstore product by SKU.",
+    input: z.object({ sku: z.string().min(1) }),
+  })
+  findProduct({ sku }: { readonly sku: string }) {
+    return this.client.findBySku(sku);
+  }
+}
+```
+
+Create `src/typemcp-tools.ts`:
+
 ```ts
 import { createTypeMcpLangChainTools } from "@theorvane/type-chain/typemcp";
 import { PetstoreServer } from "./petstore-server.js";
+
+// Construct and authorize this client in the application composition root.
+declare const petstoreClient: ConstructorParameters<typeof PetstoreServer>[0];
 
 export const tools = await createTypeMcpLangChainTools(PetstoreServer, {
   resolver: { resolve: () => new PetstoreServer(petstoreClient) },
@@ -135,6 +166,10 @@ export const tools = await createTypeMcpLangChainTools(PetstoreServer, {
 ```
 
 The resolver and `petstoreClient` remain application-owned. The bridge converts TypeMCP tools to native LangChain tools in process. It does not start stdio/HTTP, create an MCP client/session, or grant cross-process access. Use TypeMCP transport hosts separately when a client must reach another process.
+
+## Expected behavior
+
+The root declaration produces immutable TypeChain tool metadata. The LangChain path yields a standard structured tool, the agent path yields a LangChain agent only after the caller supplies a model, and the TypeMCP path yields in-process LangChain tools that resolve `PetstoreServer` with the application-owned client. None of these paths opens a listener or authorizes a user.
 
 ## Verify the pattern
 
@@ -148,7 +183,7 @@ node --test test/agent.test.mjs
 node --test test/typemcp.test.mjs
 ```
 
-In your application, test the domain result, application guard, model configuration, and credentials policy that TypeChain intentionally leaves outside its package boundary.
+In your application, test the domain result, application guard, model configuration, resolver dependencies, and credentials policy that TypeChain intentionally leaves outside its package boundary.
 
 ## Next steps
 

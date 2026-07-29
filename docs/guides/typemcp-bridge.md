@@ -1,64 +1,69 @@
 # TypeMCP in-process bridge
 
-The published `@theorvane/type-chain@0.1.1` `@theorvane/type-chain/typemcp` subpath composes a TypeMCP-decorated server into native LangChain tools in the same Node.js process. TypeMCP owns declaration validation and instance resolution; LangChain owns agent construction; the application owns models, policies, and deployment.
+The published `@theorvane/type-chain@0.1.1` `/typemcp` subpath composes a TypeMCP-decorated server into native LangChain tools in the same Node.js process. TypeMCP owns declaration validation and instance resolution; LangChain owns agent construction; the application owns models, policies, dependencies, and deployment.
 
-## Install peers
+## Prerequisites
+
+- Node.js 20 or later
+- TypeScript with standard (Stage 3) decorators; do **not** enable `experimentalDecorators`
+- A TypeMCP-decorated server class and its application-owned resolver dependencies
+- Both the TypeMCP server and LangChain consumer running in the same Node.js process
+
+## Install
 
 ```bash
 npm install @theorvane/type-chain @theorvane/type-mcp @langchain/core langchain zod
 ```
 
-This is an optional integration boundary. The root `@theorvane/type-chain` metadata package does not import TypeMCP or LangChain peers.
+This is an optional integration boundary; the root TypeChain package does not import TypeMCP or LangChain peers.
+
+## Configure TypeScript
+
+Create `tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2022", "ESNext.Decorators"],
+    "strict": true,
+    "verbatimModuleSyntax": true
+  }
+}
+```
+
+Leave `experimentalDecorators` off.
 
 ## Convert a TypeMCP server to LangChain tools
 
+Create `src/catalog-server.ts` with the TypeMCP-decorated server and its application-owned domain dependency. Then create `src/typemcp-tools.ts`:
+
 ```ts
 import { createTypeMcpLangChainTools } from "@theorvane/type-chain/typemcp";
+import { CatalogServer } from "./catalog-server.js";
 
-const tools = await createTypeMcpLangChainTools(CatalogServer, {
-  resolver: {
-    resolve: () => new CatalogServer(catalogClient),
-  },
-});
-```
+// This client is constructed and authorized by application code.
+declare const catalogClient: ConstructorParameters<typeof CatalogServer>[0];
 
-The bridge delegates to TypeMCP's `createLangChainTools()`. Your resolver remains explicit and application-owned.
-
-## Build an agent without starting a transport
-
-```ts
-import { createTypeMcpAgent } from "@theorvane/type-chain/typemcp";
-
-const agent = await createTypeMcpAgent({
-  model: yourApplicationModel,
-  server: CatalogServer,
-  resolver: {
-    resolve: () => new CatalogServer(catalogClient),
-  },
-});
-```
-
-`createTypeMcpAgent()` uses the generated LangChain tools with LangChain's `createAgent()`. It does not open a stdio or HTTP transport.
-
-## Guard TypeMCP-derived tool calls
-
-Use the guarded variants to run an application-owned hook after TypeMCP/LangChain input validation and before the resolver-backed method runs:
-
-```ts
-import { createGuardedTypeMcpAgent } from "@theorvane/type-chain/typemcp";
-
-const agent = await createGuardedTypeMcpAgent({
-  model: yourApplicationModel,
-  server: CatalogServer,
+export const tools = await createTypeMcpLangChainTools(CatalogServer, {
   resolver: { resolve: () => new CatalogServer(catalogClient) },
-  guard: async ({ name, description, input }) => {
-    await authorizeToolCall({ name, description, input });
-  },
 });
 ```
 
-The guard receives an immutable snapshot containing a tool name, description, and validated input. Throw or reject to stop the resolver-backed invocation. TypeChain does not provide a default allow/deny decision.
+The bridge delegates to TypeMCP's `createLangChainTools()` and keeps instance resolution explicit.
+
+## Expected behavior
+
+`tools` contains native LangChain tools for the decorated `CatalogServer` methods. Resolving and invoking a tool uses the supplied `catalogClient`; no stdio/HTTP listener, MCP client/session, or cross-process connection is created.
 
 ## Transport boundary
 
-The in-process bridge deliberately does **not** open MCP HTTP or stdio transports, implement MCP clients or sessions, supply credentials, or enforce authorization, approval, retries, timeouts, auditing, or redaction. Use TypeMCP transport hosts separately when cross-process MCP access is required.
+The in-process bridge does **not** open MCP HTTP or stdio transports, implement MCP clients or sessions, supply credentials, or enforce authorization, approval, retries, timeouts, auditing, or redaction. Use TypeMCP transport hosts separately when cross-process MCP access is required.
+
+## Next steps
+
+- [LangChain integration](./langchain-integration.md) — understand the standard structured-tool boundary.
+- [Agent builder](./agent-builder.md) — create a caller-owned agent with a caller-owned model.
+- [Petstore walkthrough](./petstore-walkthrough.md) — see the same-process bridge in one named catalog scenario.
