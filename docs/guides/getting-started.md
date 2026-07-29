@@ -12,7 +12,7 @@ This guide installs the published package `@theorvane/type-chain@0.1.1`, configu
 ## Install
 
 ```bash
-npm install @theorvane/type-chain
+npm install @theorvane/type-chain@0.1.1
 ```
 
 The root package has no required optional peers and can be imported on its own. LangChain and TypeMCP integrations live behind dedicated subpaths (`@theorvane/type-chain/langchain`, `/agent`, `/typemcp`) and only load their respective peers when you import them.
