@@ -226,6 +226,7 @@ TypeMCP owns its declaration validation, metadata interpretation, and resolver b
 
 ## Architecture and boundaries
 
+- [Choose a composition boundary](docs/guides/composition-selection.md) — select the root metadata package, LangChain adapter, agent builder, or in-process TypeMCP bridge.
 - [Architecture overview](docs/architecture.md) — public surfaces, composition boundaries, and non-goals.
 - [Release guide](docs/release.md) — development versus release readiness and publication checks.
 - [Contributing](CONTRIBUTING.md) — issue-first contribution and verification workflow.
