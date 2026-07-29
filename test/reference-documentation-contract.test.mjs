@@ -73,3 +73,66 @@ test("the Petstore policy and TypeMCP bridge examples name files and keep depend
   assert.match(content, /declare const petstoreClient:/);
   assert.match(content, /## Expected behavior/);
 });
+
+test("requires the project-starting TypeChain curriculum to preserve optional integration and application boundaries", async () => {
+  const curriculumGuides = [
+    "docs/guides/petstore-typechain-foundation.md",
+    "docs/guides/petstore-policy-and-composition.md",
+    "docs/guides/petstore-walkthrough.md",
+    "docs/guides/composition-selection.md",
+  ];
+  const contents = await Promise.all(
+    curriculumGuides.map(async (path) => ({
+      content: await readFile(path, "utf8"),
+      path,
+    })),
+  );
+  const allContent = contents.map(({ content }) => content).join("\n");
+  const consumerScript = await readFile(
+    "scripts/verify-packed-consumer.mjs",
+    "utf8",
+  );
+  const typeMcpGuides = await Promise.all(
+    [
+      "docs/guides/typemcp-bridge.md",
+      "docs/guides/petstore-policy-and-composition.md",
+      "docs/guides/composition-selection.md",
+      "docs/guides/petstore-walkthrough.md",
+    ].map((path) => readFile(path, "utf8")),
+  );
+  const typeMcpContent = typeMcpGuides.join("\n");
+
+  for (const { content, path } of contents) {
+    assert.match(content, /## Before you start/, path);
+    assert.match(content, /## Workspace checkpoint/, path);
+    assert.match(content, /## Install/, path);
+    assert.match(content, /## Run and verify/, path);
+    assert.match(content, /## Expected behavior/, path);
+    assert.match(content, /## Failure guide/, path);
+    assert.match(content, /## Responsibility boundary/, path);
+    assert.match(content, /## Next steps/, path);
+  }
+
+  assert.match(allContent, /@theorvane\/type-chain@0\.1\.1/);
+  assert.doesNotMatch(allContent, /npm install @theorvane\/type-chain(?:\s|$)/);
+  assert.match(consumerScript, /packed consumers: root without optional peers/);
+  assert.match(
+    typeMcpContent,
+    /new PetstoreServer\(\)\.configure\(petstoreClient\)/,
+  );
+  assert.match(
+    typeMcpContent,
+    /new CatalogServer\(\)\.configure\(catalogClient\)/,
+  );
+  assert.doesNotMatch(typeMcpContent, /new (?:Petstore|Catalog)Server\([^)]/);
+  assert.match(allContent, /@Tool\(\)/);
+  assert.match(allContent, /@Policy\(\)/);
+  assert.match(allContent, /declare const petstoreClient:/);
+  for (const subpath of ["/langchain", "/agent", "/typemcp"]) {
+    assert.match(allContent, new RegExp(subpath));
+  }
+  assert.doesNotMatch(
+    allContent,
+    /TypeChain (?:owns|starts|chooses) (?:a model|credentials|deployment|transport)/i,
+  );
+});

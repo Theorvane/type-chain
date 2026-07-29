@@ -11,7 +11,7 @@ The published `@theorvane/type-chain@0.1.1` package lets a tool declare policy i
 ## Install
 
 ```bash
-npm install @theorvane/type-chain zod
+npm install @theorvane/type-chain@0.1.1 zod
 ```
 
 Use the `/langchain` optional subpath only if the application later adapts guarded tools to LangChain.

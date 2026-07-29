@@ -11,7 +11,7 @@
 ## Install
 
 ```bash
-npm install @theorvane/type-chain @langchain/core langchain zod
+npm install @theorvane/type-chain@0.1.1 @langchain/core langchain zod
 ```
 
 The root package remains independent of optional peers. Import `/langchain` only where the application needs this adapter.

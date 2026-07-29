@@ -4,12 +4,22 @@
 
 TypeChain makes tool and policy declarations explicit, then adapts those declarations at a boundary selected by the application. Start with the narrowest import that reaches the behavior you need. The application keeps ownership of models, credentials, authorization, enforcement, state, persistence, streaming, hosting, and deployment.
 
-## Select the entry point from the integration you own
+## Before you start
+
+- Node.js 20 or later
+- A project that has completed [Petstore TypeChain foundation](petstore-typechain-foundation.md) when following the project-starting curriculum
+- An application-owned decision for whether the next boundary is root-only, LangChain, agent, or in-process TypeMCP
+
+## Workspace checkpoint
+
+This is the routing chapter after an inspected root definition. It is not a second foundation: complete the foundation guide for `tsconfig.json`, `@types/node`, and the first named files before selecting an optional subpath.
+
+## Install
 
 Install the root package first:
 
 ```bash
-npm install @theorvane/type-chain
+npm install @theorvane/type-chain@0.1.1
 ```
 
 | Need | Import | Use it when | Keep in the application |
@@ -23,10 +33,10 @@ The root package has no required optional peer imports. Install only the peers f
 
 ```bash
 # Standard LangChain tool or agent composition
-npm install @langchain/core langchain zod
+npm install @theorvane/type-chain@0.1.1 @langchain/core langchain zod
 
 # In-process TypeMCP composition
-npm install @theorvane/type-mcp @langchain/core langchain zod
+npm install @theorvane/type-chain@0.1.1 @theorvane/type-mcp@0.2.2 @langchain/core langchain zod
 ```
 
 ## Begin with one declared tool
@@ -106,22 +116,62 @@ The TypeMCP bridge is not an MCP host or client. It converts a TypeMCP-decorated
 
 ```ts
 import { createTypeMcpLangChainTools } from "@theorvane/type-chain/typemcp";
-import { CatalogServer } from "./catalog-server.js";
+import type { PetstoreClient } from "./petstore-client.js";
+import { PetstoreServer } from "./petstore-server.js";
 
-const tools = await createTypeMcpLangChainTools(CatalogServer, {
-  resolver: {
-    resolve: () => new CatalogServer(catalogClient),
-  },
+// Construct and authorize this client in the application composition root.
+declare const petstoreClient: PetstoreClient;
+
+export const tools = await createTypeMcpLangChainTools(PetstoreServer, {
+  resolver: { resolve: () => new PetstoreServer().configure(petstoreClient) },
 });
 ```
 
-The explicit resolver remains application-owned. TypeMCP validates the MCP declaration and resolves the server instance; TypeChain adapts the resulting tools; LangChain owns agent construction. No stdio or HTTP transport is started. Use TypeMCP’s transport hosts separately when tools must be accessed across process boundaries.
+The TypeMCP-decorated server must keep a zero-argument constructor under the published `0.2.2` `@McpServer` contract. The resolver configures application dependencies before conversion; the explicit resolver remains application-owned. TypeMCP validates the MCP declaration and resolves the server instance; TypeChain adapts the resulting tools; LangChain owns agent construction. No stdio or HTTP transport is started. Use TypeMCP’s transport hosts separately when tools must be accessed across process boundaries.
 
-## Continue from the chosen boundary
+## Run and verify
 
-- [Getting started](getting-started.md) covers installation, Stage 3 decorator configuration, and a first tool.
-- [Core concepts](core-concepts.md) explains metadata, runtime schemas, policy intent, and application ownership.
-- [Petstore walkthrough](petstore-walkthrough.md) follows one catalog tool through the optional integration choices.
+Use the root-only checkpoint first:
+
+```bash
+npm run check
+npm run inspect-tools
+```
+
+Then select one extension and run only the matching local contract:
+
+```bash
+# Existing LangChain composition
+node --test test/langchain-adapter.test.mjs
+
+# Direct application-owned agent with a caller-supplied model
+node --test test/agent.test.mjs
+
+# In-process TypeMCP conversion; this does not start MCP stdio or HTTP
+node --test test/typemcp.test.mjs
+```
+
+These commands verify adapters without a provider call or public host. Your application must still test its own model, guard, resolver dependencies, credentials, and deployment configuration.
+
+## Expected behavior
+
+The root path records immutable definitions without optional peer imports. Each selected subpath adds only its stated adapter: LangChain tools, a caller-model agent bridge, or an in-process TypeMCP conversion. No route starts a network listener or turns policy metadata into authorization automatically.
+
+## Failure guide
+
+- **A subpath import cannot resolve:** install only the peer group shown for that subpath and retain the root-only import in unrelated files.
+- **A policy-decorated action runs without enforcement:** choose a guarded adapter and supply an application guard; `@Policy()` records intent rather than an allow/deny result.
+- **A separate process needs MCP access:** choose a TypeMCP stdio or HTTP host in that application. The `/typemcp` adapter is intentionally in-process.
+
+## Responsibility boundary
+
+TypeChain owns explicit tool/policy metadata and the selected adapter. The application owns model/provider selection, credentials, authorization and enforcement, persistence/state, host lifecycle, cross-process transport, observability, retry/timeout behavior, and deployment.
+
+## Next steps
+
+- [Petstore TypeChain foundation](petstore-typechain-foundation.md) starts a strict workspace with an inspected root tool definition.
+- [Petstore policy and composition](petstore-policy-and-composition.md) records policy intent and then selects exactly one optional integration.
+- [Petstore walkthrough](petstore-walkthrough.md) is the compact route map for the same catalog scenario.
 - [Tools and definitions](tools-and-definitions.md) explains immutable definitions and inheritance rules.
 - [Policy and guards](policy.md) describes declarative policy metadata and application-owned enforcement.
 - [LangChain integration](langchain-integration.md) covers standard structured-tool adaptation.

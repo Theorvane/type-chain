@@ -11,7 +11,7 @@ This guide uses the published `@theorvane/type-chain@0.1.1` root surface to reco
 ## Install
 
 ```bash
-npm install @theorvane/type-chain zod
+npm install @theorvane/type-chain@0.1.1 zod
 ```
 
 The root metadata package has no required optional peer. Add `/langchain`, `/agent`, or `/typemcp` only when your application chooses that integration boundary.
