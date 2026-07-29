@@ -120,6 +120,8 @@ The explicit resolver remains application-owned. TypeMCP validates the MCP decla
 ## Continue from the chosen boundary
 
 - [Getting started](getting-started.md) covers installation, Stage 3 decorator configuration, and a first tool.
+- [Core concepts](core-concepts.md) explains metadata, runtime schemas, policy intent, and application ownership.
+- [Petstore walkthrough](petstore-walkthrough.md) follows one catalog tool through the optional integration choices.
 - [Tools and definitions](tools-and-definitions.md) explains immutable definitions and inheritance rules.
 - [Policy and guards](policy.md) describes declarative policy metadata and application-owned enforcement.
 - [LangChain integration](langchain-integration.md) covers standard structured-tool adaptation.
