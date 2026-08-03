@@ -1,6 +1,6 @@
 # Tools and definitions
 
-This guide uses the published `@theorvane/type-chain@0.1.1` root surface to record explicit tool metadata and inspect immutable, receiver-bound definitions. TypeChain does not infer runtime schemas from TypeScript types or start a transport.
+This guide uses the published `@theorvane/type-chain@0.2.0` root surface to record explicit tool metadata and inspect immutable, receiver-bound definitions. TypeChain does not infer runtime schemas from TypeScript types or start a transport.
 
 ## Prerequisites
 
@@ -11,7 +11,7 @@ This guide uses the published `@theorvane/type-chain@0.1.1` root surface to reco
 ## Install
 
 ```bash
-npm install @theorvane/type-chain@0.1.1 zod
+npm install @theorvane/type-chain@0.2.0 zod
 ```
 
 The root metadata package has no required optional peer. Add `/langchain`, `/agent`, or `/typemcp` only when your application chooses that integration boundary.

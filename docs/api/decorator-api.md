@@ -1,6 +1,6 @@
 # Decorator API contract
 
-`@theorvane/type-chain@0.1.1` is the current public TypeChain release. It supports standard TypeScript Stage 3 decorators and explicit runtime schemas. It does not infer schemas from TypeScript parameter types or use legacy `reflect-metadata` behavior.
+`@theorvane/type-chain@0.2.0` is the current public TypeChain release. It supports standard TypeScript Stage 3 decorators and explicit runtime schemas. It does not infer schemas from TypeScript parameter types or use legacy `reflect-metadata` behavior.
 
 ## Root package
 

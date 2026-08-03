@@ -1,8 +1,8 @@
-# Getting started with @theorvane/type-chain@0.1.1
+# Getting started with @theorvane/type-chain@0.2.0
 
 TypeChain is a decorator-first, type-safe authoring layer for LangChain JS tools and agents. It records explicit tool metadata, adapts it to standard LangChain tools, and leaves model choice, credentials, authorization, retries, timeouts, persistence, redaction, and audit policy to your application.
 
-This guide installs the published package `@theorvane/type-chain@0.1.1`, configures Stage 3 decorators, and declares a first tool.
+This guide installs the published package `@theorvane/type-chain@0.2.0`, configures Stage 3 decorators, and declares a first tool.
 
 ## Requirements
 
@@ -12,7 +12,7 @@ This guide installs the published package `@theorvane/type-chain@0.1.1`, configu
 ## Install
 
 ```bash
-npm install @theorvane/type-chain@0.1.1
+npm install @theorvane/type-chain@0.2.0
 ```
 
 The root package has no required optional peers and can be imported on its own. LangChain and TypeMCP integrations live behind dedicated subpaths (`@theorvane/type-chain/langchain`, `/agent`, `/typemcp`) and only load their respective peers when you import them.
