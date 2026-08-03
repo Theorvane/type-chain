@@ -100,7 +100,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.5.5",
     "@langchain/core": "1.2.3",
-    "@theorvane/type-mcp": "0.2.0",
+    "@theorvane/type-mcp": "0.2.2",
     "langchain": "1.5.4",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
