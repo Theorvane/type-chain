@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "experimentalDecorators": true,
+    "verbatimModuleSyntax": false,
+    "rootDir": ".",
+    "outDir": ".legacy-test-dist"
+  },
+  "include": ["legacy-tests/**/*.ts"]
+}

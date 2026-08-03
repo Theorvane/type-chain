@@ -30,6 +30,9 @@ test("CI verifies both integration and release branches", async () => {
 test("publish readiness verifies an installed packed consumer", async () => {
   const manifest = JSON.parse(await readWorkflow("../package.json"));
   const script = await readWorkflow("../scripts/verify-packed-consumer.mjs");
+  const legacyScript = await readWorkflow(
+    "../scripts/verify-legacy-consumer.mjs",
+  );
 
   const packJson = await readWorkflow("../scripts/pack-json.mjs");
 
@@ -37,6 +40,7 @@ test("publish readiness verifies an installed packed consumer", async () => {
   assert.match(manifest.scripts["verify:publish"], /verify:consumer/);
   assert.match(script, /"npm", \["pack", "--json", "--ignore-scripts"\]/);
   assert.match(script, /getPackedTarballFilename/);
+  assert.match(legacyScript, /getPackedTarballFilename/);
   assert.match(packJson, /Array\.isArray\(packed\)/);
   assert.match(packJson, /Object\.values\(packed \?\? \{\}\)/);
   assert.match(script, /toGuardedLangChainTools/);
