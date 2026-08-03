@@ -3,6 +3,8 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
+import { getPackedTarballFilename } from "./pack-json.mjs";
+
 const packageRoot = process.cwd();
 let consumer;
 let tarballPath;
@@ -17,10 +19,12 @@ function run(command, args, cwd = packageRoot) {
 
 try {
   run("npm", ["run", "build"]);
-  const [packed] = JSON.parse(
-    run("npm", ["pack", "--json", "--ignore-scripts"]),
+  tarballPath = resolve(
+    packageRoot,
+    getPackedTarballFilename(
+      JSON.parse(run("npm", ["pack", "--json", "--ignore-scripts"])),
+    ),
   );
-  tarballPath = resolve(packageRoot, packed.filename);
   consumer = mkdtempSync(join(tmpdir(), "type-chain-legacy-consumer-"));
   run("npm", ["init", "--yes"], consumer);
   run(
