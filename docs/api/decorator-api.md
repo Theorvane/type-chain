@@ -121,6 +121,34 @@ These APIs compose a TypeMCP-decorated server into native LangChain tools and ag
 
 They do not open a TypeMCP HTTP or stdio transport, create MCP clients or sessions, supply credentials, or make authorization decisions.
 
+## Legacy CJS decorators
+
+`@theorvane/type-chain/legacy` is the compatibility entrypoint for legacy
+TypeScript decorators in CommonJS applications. It exports `Tool`, `Policy`,
+`Agent`, `getToolDefinitions`, `toLangChainTools`, and `buildAgent`. Its
+metadata and validation contracts match the Stage 3 APIs, while LangChain
+adaptation and agent construction are asynchronous because the optional
+LangChain dependencies are loaded only at runtime.
+
+```ts
+import { Agent, Policy, Tool } from "@theorvane/type-chain/legacy";
+
+@Agent({ systemPrompt: "Use approved tools." })
+class LegacyTools {
+  @Tool({ name: "search_issues", description: "Search repository issues.", schema: { type: "object" } })
+  @Policy({ authorization: "required" })
+  search(input: { readonly query: string }) {
+    return input.query;
+  }
+}
+```
+
+Use `"module": "Node16"`, `"moduleResolution": "Node16"`, and
+`"experimentalDecorators": true` for CommonJS consumers. Legacy support is
+limited to public instance methods with string names; parameter, accessor,
+field, private, and symbol-named decorators are excluded. Do not mix Stage 3
+and legacy decorators in one TypeScript compilation unit.
+
 ## Package boundary
 
 | Import | Responsibility |
