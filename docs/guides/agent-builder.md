@@ -1,6 +1,6 @@
 # Agent builder
 
-The published `@theorvane/type-chain@0.2.0` `/agent` subpath provides a narrow decorator-first bridge to LangChain's `createAgent()`. The application provides the model and retains ownership of the lifecycle and all runtime controls.
+The published `@theorvane/type-chain@0.2.1` `/agent` subpath provides a narrow decorator-first bridge to LangChain's `createAgent()`. The application provides the model and retains ownership of the lifecycle and all runtime controls.
 
 ## Prerequisites
 
@@ -11,7 +11,7 @@ The published `@theorvane/type-chain@0.2.0` `/agent` subpath provides a narrow d
 ## Install
 
 ```bash
-npm install @theorvane/type-chain@0.2.0 @langchain/core langchain zod
+npm install @theorvane/type-chain@0.2.1 @langchain/core langchain zod
 ```
 
 `/agent` is optional. Import the root package alone when tool metadata is sufficient.

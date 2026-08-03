@@ -1,6 +1,6 @@
 {
   "name": "@theorvane/type-chain",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Decorator-first, type-safe authoring layer for LangChain JS tools and agents.",
   "license": "MIT",
   "type": "module",
@@ -12,24 +12,44 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "default": "./dist/index.js"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     },
     "./langchain": {
-      "types": "./dist/langchain.d.ts",
-      "import": "./dist/langchain.js",
-      "default": "./dist/langchain.js"
+      "import": {
+        "types": "./dist/langchain.d.ts",
+        "default": "./dist/langchain.js"
+      },
+      "require": {
+        "types": "./dist/langchain.d.cts",
+        "default": "./dist/langchain.cjs"
+      }
     },
     "./agent": {
-      "types": "./dist/agent.d.ts",
-      "import": "./dist/agent.js",
-      "default": "./dist/agent.js"
+      "import": {
+        "types": "./dist/agent.d.ts",
+        "default": "./dist/agent.js"
+      },
+      "require": {
+        "types": "./dist/agent.d.cts",
+        "default": "./dist/agent.cjs"
+      }
     },
     "./typemcp": {
-      "types": "./dist/typemcp.d.ts",
-      "import": "./dist/typemcp.js",
-      "default": "./dist/typemcp.js"
+      "import": {
+        "types": "./dist/typemcp.d.ts",
+        "default": "./dist/typemcp.js"
+      },
+      "require": {
+        "types": "./dist/typemcp.d.cts",
+        "default": "./dist/typemcp.cjs"
+      }
     },
     "./legacy": {
       "import": {
@@ -52,7 +72,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsc --project tsconfig.build.json && tsup src/legacy.ts --format esm,cjs --dts --out-dir dist --clean=false",
+    "build": "tsc --project tsconfig.build.json && tsup src/index.ts src/langchain.ts src/agent.ts src/typemcp.ts src/legacy.ts --format cjs --dts --out-dir dist --clean=false && tsup src/legacy.ts --format esm --out-dir dist --clean=false",
     "lint": "biome check .",
     "format:check": "biome format .",
     "typecheck": "tsc --noEmit",
@@ -100,7 +120,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.5.5",
     "@langchain/core": "1.2.3",
-    "@theorvane/type-mcp": "0.3.0",
+    "@theorvane/type-mcp": "0.3.1",
     "langchain": "1.5.4",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",

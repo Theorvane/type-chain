@@ -42,7 +42,7 @@ npm ci
 npm run verify
 ```
 
-For a consuming TypeScript application, use a Node-aware compiler configuration and do **not** enable TypeScript's legacy `experimentalDecorators` mode for these root Stage 3 examples. CommonJS legacy decorator consumers must import from `@theorvane/type-chain/legacy`, use Node16 module resolution, and await its LangChain adapters; see the [Decorator API contract](docs/api/decorator-api.md#legacy-cjs-decorators).
+For a consuming TypeScript application, use a Node-aware compiler configuration and do **not** enable TypeScript's legacy `experimentalDecorators` mode for these root Stage 3 examples. CommonJS consumers can use Node16 module resolution with static imports of the root, `/langchain`, `/agent`, and `/typemcp` subpaths; the package selects matching CJS `.d.cts` declarations and `.cjs` runtime exports. CommonJS legacy decorator consumers must import decorators from `@theorvane/type-chain/legacy` and await its LangChain adapters; see the [Decorator API contract](docs/api/decorator-api.md#legacy-cjs-decorators).
 
 ```json
 {
