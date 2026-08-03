@@ -1,6 +1,6 @@
 # Decorator API contract
 
-`@theorvane/type-chain@0.2.0` is the current public TypeChain release. It supports standard TypeScript Stage 3 decorators and explicit runtime schemas. It does not infer schemas from TypeScript parameter types or use legacy `reflect-metadata` behavior.
+`@theorvane/type-chain@0.2.1` is the current public TypeChain release. It supports standard TypeScript Stage 3 decorators and explicit runtime schemas. It does not infer schemas from TypeScript parameter types or use legacy `reflect-metadata` behavior.
 
 ## Root package
 
@@ -144,7 +144,11 @@ class LegacyTools {
 ```
 
 Use `"module": "Node16"`, `"moduleResolution": "Node16"`, and
-`"experimentalDecorators": true` for CommonJS consumers. Legacy support is
+`"experimentalDecorators": true` for CommonJS consumers. In the same Node16
+compilation, static imports of the root, `/langchain`, `/agent`, and `/typemcp`
+subpaths select their CJS `.d.cts` declarations and `.cjs` runtime exports.
+Install the relevant optional peers (`@langchain/core`, `langchain`, and/or
+`@theorvane/type-mcp`) for any subpath you import. Legacy support is
 limited to public instance methods with string names; parameter, accessor,
 field, private, and symbol-named decorators are excluded. Do not mix Stage 3
 and legacy decorators in one TypeScript compilation unit.

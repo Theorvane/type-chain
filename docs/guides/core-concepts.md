@@ -1,6 +1,6 @@
 # Core concepts
 
-This page explains the published [`@theorvane/type-chain@0.2.0`](https://www.npmjs.com/package/@theorvane/type-chain) model before you select an optional integration.
+This page explains the published [`@theorvane/type-chain@0.2.1`](https://www.npmjs.com/package/@theorvane/type-chain) model before you select an optional integration.
 
 > **Responsibility boundary:** TypeChain records declarations and adapts them at explicit boundaries. Applications retain ownership of **models, credentials, policy enforcement, state, hosting, deployment, and cross-process MCP transport**.
 
