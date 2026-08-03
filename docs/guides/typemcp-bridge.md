@@ -1,6 +1,6 @@
 # TypeMCP in-process bridge
 
-The published `@theorvane/type-chain@0.1.1` `/typemcp` subpath composes a TypeMCP-decorated server into native LangChain tools in the same Node.js process. TypeMCP owns declaration validation and instance resolution; LangChain owns agent construction; the application owns models, policies, dependencies, and deployment.
+The published `@theorvane/type-chain@0.2.0` `/typemcp` subpath composes a TypeMCP-decorated server into native LangChain tools in the same Node.js process. TypeMCP owns declaration validation and instance resolution; LangChain owns agent construction; the application owns models, policies, dependencies, and deployment.
 
 ## Prerequisites
 
@@ -12,7 +12,7 @@ The published `@theorvane/type-chain@0.1.1` `/typemcp` subpath composes a TypeMC
 ## Install
 
 ```bash
-npm install @theorvane/type-chain@0.1.1 @theorvane/type-mcp@0.2.2 @langchain/core langchain zod
+npm install @theorvane/type-chain@0.2.0 @theorvane/type-mcp@0.3.0 @langchain/core langchain zod
 ```
 
 This is an optional integration boundary; the root TypeChain package does not import TypeMCP or LangChain peers.

@@ -9,6 +9,9 @@ const required = [
   "dist/agent.d.ts",
   "dist/typemcp.js",
   "dist/typemcp.d.ts",
+  "dist/legacy.js",
+  "dist/legacy.cjs",
+  "dist/legacy.d.ts",
   "README.md",
   "LICENSE",
 ];
@@ -41,6 +44,16 @@ if (
   bridgeExport?.import !== "./dist/typemcp.js"
 ) {
   throw new Error("Package contract is missing the type-chain/typemcp export.");
+}
+
+const legacyExport = packageJson.exports?.["./legacy"];
+if (
+  legacyExport?.import?.types !== "./dist/legacy.d.ts" ||
+  legacyExport?.import?.default !== "./dist/legacy.js" ||
+  legacyExport?.require?.types !== "./dist/legacy.d.cts" ||
+  legacyExport?.require?.default !== "./dist/legacy.cjs"
+) {
+  throw new Error("Package contract is missing the type-chain/legacy export.");
 }
 
 for (const dependency of [

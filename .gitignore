@@ -1,6 +1,7 @@
 node_modules/
 dist/
 .test-dist/
+.legacy-test-dist/
 coverage/
 *.tgz
 *.log

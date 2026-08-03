@@ -21,7 +21,7 @@ test("reference-first TypeChain documentation routes Petstore readers without cl
     await Promise.all(documents.map((path) => readFile(path, "utf8")))
   ).join("\n");
 
-  assert.match(content, /@theorvane\/type-chain@0\.1\.1/);
+  assert.match(content, /@theorvane\/type-chain@0\.2\.0/);
   for (const entryPoint of [
     "Define tools",
     "Enforce a policy",
@@ -113,7 +113,7 @@ test("requires the project-starting TypeChain curriculum to preserve optional in
     assert.match(content, /## Next steps/, path);
   }
 
-  assert.match(allContent, /@theorvane\/type-chain@0\.1\.1/);
+  assert.match(allContent, /@theorvane\/type-chain@0\.2\.0/);
   assert.doesNotMatch(allContent, /npm install @theorvane\/type-chain(?:\s|$)/);
   assert.match(consumerScript, /packed consumers: root without optional peers/);
   assert.match(

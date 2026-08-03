@@ -1,6 +1,6 @@
 # Choose a TypeChain composition boundary
 
-> **Release status:** This guide documents the published `@theorvane/type-chain@0.1.1` package. Every optional integration stays behind a dedicated subpath, so importing the root metadata package does not load LangChain or TypeMCP peers.
+> **Release status:** This guide documents the published `@theorvane/type-chain@0.2.0` package. Every optional integration stays behind a dedicated subpath, so importing the root metadata package does not load LangChain or TypeMCP peers.
 
 TypeChain makes tool and policy declarations explicit, then adapts those declarations at a boundary selected by the application. Start with the narrowest import that reaches the behavior you need. The application keeps ownership of models, credentials, authorization, enforcement, state, persistence, streaming, hosting, and deployment.
 
@@ -19,7 +19,7 @@ This is the routing chapter after an inspected root definition. It is not a seco
 Install the root package first:
 
 ```bash
-npm install @theorvane/type-chain@0.1.1
+npm install @theorvane/type-chain@0.2.0
 ```
 
 | Need | Import | Use it when | Keep in the application |
@@ -33,10 +33,10 @@ The root package has no required optional peer imports. Install only the peers f
 
 ```bash
 # Standard LangChain tool or agent composition
-npm install @theorvane/type-chain@0.1.1 @langchain/core langchain zod
+npm install @theorvane/type-chain@0.2.0 @langchain/core langchain zod
 
 # In-process TypeMCP composition
-npm install @theorvane/type-chain@0.1.1 @theorvane/type-mcp@0.2.2 @langchain/core langchain zod
+npm install @theorvane/type-chain@0.2.0 @theorvane/type-mcp@0.3.0 @langchain/core langchain zod
 ```
 
 ## Begin with one declared tool
@@ -127,7 +127,7 @@ export const tools = await createTypeMcpLangChainTools(PetstoreServer, {
 });
 ```
 
-The TypeMCP-decorated server must keep a zero-argument constructor under the published `0.2.2` `@McpServer` contract. The resolver configures application dependencies before conversion; the explicit resolver remains application-owned. TypeMCP validates the MCP declaration and resolves the server instance; TypeChain adapts the resulting tools; LangChain owns agent construction. No stdio or HTTP transport is started. Use TypeMCP’s transport hosts separately when tools must be accessed across process boundaries.
+The TypeMCP-decorated server must keep a zero-argument constructor under the published `0.3.0` `@McpServer` contract. The resolver configures application dependencies before conversion; the explicit resolver remains application-owned. TypeMCP validates the MCP declaration and resolves the server instance; TypeChain adapts the resulting tools; LangChain owns agent construction. No stdio or HTTP transport is started. Use TypeMCP’s transport hosts separately when tools must be accessed across process boundaries.
 
 ## Run and verify
 
@@ -177,6 +177,6 @@ TypeChain owns explicit tool/policy metadata and the selected adapter. The appli
 - [LangChain integration](langchain-integration.md) covers standard structured-tool adaptation.
 - [Agent builder](agent-builder.md) details direct agent construction and guarded agents.
 - [TypeMCP bridge](typemcp-bridge.md) explains the in-process TypeMCP composition boundary.
-- [Decorator API contract](../api/decorator-api.md) lists every public `0.1.1` import surface.
+- [Decorator API contract](../api/decorator-api.md) lists every public `0.2.0` import surface.
 
 The selected subpath should match the integration boundary, not the product label. Use the root package for declarations, the LangChain adapter for existing LangChain composition, the agent bridge only when the application owns a model, and the TypeMCP bridge only for in-process composition.

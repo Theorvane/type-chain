@@ -1,6 +1,6 @@
 # Declarative policy and application-owned guards
 
-The published `@theorvane/type-chain@0.1.1` package lets a tool declare policy intent. It does not provide a default allow/deny decision or enforce authorization, approvals, retries, timeouts, idempotency, auditing, or redaction.
+The published `@theorvane/type-chain@0.2.0` package lets a tool declare policy intent. It does not provide a default allow/deny decision or enforce authorization, approvals, retries, timeouts, idempotency, auditing, or redaction.
 
 ## Prerequisites
 
@@ -11,7 +11,7 @@ The published `@theorvane/type-chain@0.1.1` package lets a tool declare policy i
 ## Install
 
 ```bash
-npm install @theorvane/type-chain@0.1.1 zod
+npm install @theorvane/type-chain@0.2.0 zod
 ```
 
 Use the `/langchain` optional subpath only if the application later adapts guarded tools to LangChain.

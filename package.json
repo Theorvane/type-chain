@@ -1,6 +1,6 @@
 {
   "name": "@theorvane/type-chain",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Decorator-first, type-safe authoring layer for LangChain JS tools and agents.",
   "license": "MIT",
   "type": "module",
@@ -30,6 +30,16 @@
       "types": "./dist/typemcp.d.ts",
       "import": "./dist/typemcp.js",
       "default": "./dist/typemcp.js"
+    },
+    "./legacy": {
+      "import": {
+        "types": "./dist/legacy.d.ts",
+        "default": "./dist/legacy.js"
+      },
+      "require": {
+        "types": "./dist/legacy.d.cts",
+        "default": "./dist/legacy.cjs"
+      }
     }
   },
   "types": "./dist/index.d.ts",
@@ -42,15 +52,16 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsc --project tsconfig.build.json",
+    "build": "tsc --project tsconfig.build.json && tsup src/legacy.ts --format esm,cjs --dts --out-dir dist --clean=false",
     "lint": "biome check .",
     "format:check": "biome format .",
     "typecheck": "tsc --noEmit",
     "build:test-fixtures": "tsc --project tsconfig.test-fixtures.json",
-    "test": "npm run build && npm run build:test-fixtures && node --test",
+    "build:legacy-test-fixtures": "tsc --project tsconfig.legacy-tests.json",
+    "test": "npm run build && npm run build:test-fixtures && npm run build:legacy-test-fixtures && node --test",
     "verify": "npm run lint && npm run typecheck && npm run test && npm run build && npm run verify:package",
     "verify:package": "node scripts/verify-package.mjs",
-    "verify:consumer": "node scripts/verify-packed-consumer.mjs",
+    "verify:consumer": "node scripts/verify-packed-consumer.mjs && node scripts/verify-legacy-consumer.mjs",
     "verify:publish": "npm run verify && npm run verify:consumer && npm pack --dry-run --json --ignore-scripts",
     "prepublishOnly": "node scripts/assert-release-readiness.mjs && npm run verify:publish"
   },
@@ -72,7 +83,7 @@
   ],
   "peerDependencies": {
     "@langchain/core": "^1.2.3",
-    "@theorvane/type-mcp": "^0.2.0",
+    "@theorvane/type-mcp": "^0.3.0",
     "langchain": "^1.5.4"
   },
   "peerDependenciesMeta": {
@@ -89,8 +100,9 @@
   "devDependencies": {
     "@biomejs/biome": "^2.5.5",
     "@langchain/core": "1.2.3",
-    "@theorvane/type-mcp": "0.2.0",
+    "@theorvane/type-mcp": "0.3.0",
     "langchain": "1.5.4",
+    "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "zod": "^4.4.3",
     "zod-v3": "npm:zod@^3.25.76"

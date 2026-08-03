@@ -1,6 +1,6 @@
 # Petstore walkthrough: typed tools at the boundary you own
 
-This walkthrough uses one Petstore catalog tool to show the published [`@theorvane/type-chain@0.1.1`](https://www.npmjs.com/package/@theorvane/type-chain) flow: declare an explicit tool, optionally attach policy intent, then choose a LangChain, agent, or in-process TypeMCP boundary.
+This walkthrough uses one Petstore catalog tool to show the published [`@theorvane/type-chain@0.2.0`](https://www.npmjs.com/package/@theorvane/type-chain) flow: declare an explicit tool, optionally attach policy intent, then choose a LangChain, agent, or in-process TypeMCP boundary.
 
 > **What this does not do:** TypeChain does not choose models, credentials, policy enforcement, state, hosting, deployment, or cross-process MCP transport. Your application supplies those decisions.
 
@@ -19,7 +19,7 @@ For a project-starting route, complete [Petstore TypeChain foundation](petstore-
 Install the root package and Zod:
 
 ```bash
-npm install @theorvane/type-chain@0.1.1 zod
+npm install @theorvane/type-chain@0.2.0 zod
 ```
 
 Use Node-aware TypeScript configuration:
@@ -89,7 +89,7 @@ This records intent. It does not enforce authorization or write an audit event a
 Install optional peers only for this path:
 
 ```bash
-npm install @theorvane/type-chain@0.1.1 @langchain/core langchain zod
+npm install @theorvane/type-chain@0.2.0 @langchain/core langchain zod
 ```
 
 Create `src/langchain-tools.ts`:
@@ -129,7 +129,7 @@ export const agent = buildAgent(new PetstoreAgent(), {
 When a TypeMCP-decorated Petstore server and the LangChain application live in the same Node.js process, install the bridge peers:
 
 ```bash
-npm install @theorvane/type-chain@0.1.1 @theorvane/type-mcp@0.2.2 @langchain/core langchain zod
+npm install @theorvane/type-chain@0.2.0 @theorvane/type-mcp@0.3.0 @langchain/core langchain zod
 ```
 
 Create `src/petstore-server.ts`:
@@ -181,7 +181,7 @@ export const tools = await createTypeMcpLangChainTools(PetstoreServer, {
 });
 ```
 
-The TypeMCP-decorated class deliberately keeps a zero-argument constructor because that is the published `@McpServer` contract in `0.2.2`. The explicit resolver configures the application-owned client before conversion; keep that composition-root seam while preserving the TypeMCP declaration contract.
+The TypeMCP-decorated class deliberately keeps a zero-argument constructor because that is the published `@McpServer` contract in `0.3.0`. The explicit resolver configures the application-owned client before conversion; keep that composition-root seam while preserving the TypeMCP declaration contract.
 
 The resolver and `petstoreClient` remain application-owned. The bridge converts TypeMCP tools to native LangChain tools in process. It does not start stdio/HTTP, create an MCP client/session, or grant cross-process access. Use TypeMCP transport hosts separately when a client must reach another process.
 
