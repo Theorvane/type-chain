@@ -41,6 +41,11 @@ test("publish readiness verifies an installed packed consumer", async () => {
   assert.match(script, /"npm", \["pack", "--json", "--ignore-scripts"\]/);
   assert.match(script, /getPackedTarballFilename/);
   assert.match(legacyScript, /getPackedTarballFilename/);
+  assert.match(legacyScript, /@theorvane\/type-mcp@0\.3\.1/);
+  assert.match(legacyScript, /@theorvane\/type-chain\/langchain/);
+  assert.match(legacyScript, /@theorvane\/type-chain\/agent/);
+  assert.match(legacyScript, /@theorvane\/type-chain\/typemcp/);
+  assert.match(legacyScript, /dist\/imports\.js/);
   assert.match(packJson, /Array\.isArray\(packed\)/);
   assert.match(packJson, /Object\.values\(packed \?\? \{\}\)/);
   assert.match(script, /toGuardedLangChainTools/);
@@ -56,7 +61,7 @@ test("public release metadata and documentation use the scoped first-release con
   const releaseGuide = await readWorkflow("../docs/release.md");
 
   assert.equal(manifest.name, "@theorvane/type-chain");
-  assert.equal(manifest.version, "0.2.0");
+  assert.equal(manifest.version, "0.2.1");
   assert.equal(manifest.peerDependencies["@theorvane/type-mcp"], "^0.3.0");
   assert.equal(manifest.publishConfig.access, "public");
   assert.match(readme, /Install from npm/);

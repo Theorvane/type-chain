@@ -1,6 +1,6 @@
 # Choose a TypeChain composition boundary
 
-> **Release status:** This guide documents the published `@theorvane/type-chain@0.2.0` package. Every optional integration stays behind a dedicated subpath, so importing the root metadata package does not load LangChain or TypeMCP peers.
+> **Release status:** This guide documents the published `@theorvane/type-chain@0.2.1` package. Every optional integration stays behind a dedicated subpath, so importing the root metadata package does not load LangChain or TypeMCP peers.
 
 TypeChain makes tool and policy declarations explicit, then adapts those declarations at a boundary selected by the application. Start with the narrowest import that reaches the behavior you need. The application keeps ownership of models, credentials, authorization, enforcement, state, persistence, streaming, hosting, and deployment.
 
@@ -19,7 +19,7 @@ This is the routing chapter after an inspected root definition. It is not a seco
 Install the root package first:
 
 ```bash
-npm install @theorvane/type-chain@0.2.0
+npm install @theorvane/type-chain@0.2.1
 ```
 
 | Need | Import | Use it when | Keep in the application |
@@ -33,10 +33,10 @@ The root package has no required optional peer imports. Install only the peers f
 
 ```bash
 # Standard LangChain tool or agent composition
-npm install @theorvane/type-chain@0.2.0 @langchain/core langchain zod
+npm install @theorvane/type-chain@0.2.1 @langchain/core langchain zod
 
 # In-process TypeMCP composition
-npm install @theorvane/type-chain@0.2.0 @theorvane/type-mcp@0.3.0 @langchain/core langchain zod
+npm install @theorvane/type-chain@0.2.1 @theorvane/type-mcp@0.3.1 @langchain/core langchain zod
 ```
 
 ## Begin with one declared tool

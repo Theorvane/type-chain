@@ -35,6 +35,9 @@ try {
       "--no-audit",
       "--no-fund",
       tarballPath,
+      "@langchain/core@1.2.3",
+      "@theorvane/type-mcp@0.3.1",
+      "langchain@1.5.4",
       "@types/node",
     ],
     consumer,
@@ -52,7 +55,7 @@ try {
           skipLibCheck: true,
           outDir: "dist",
         },
-        include: ["tools.ts"],
+        include: ["tools.ts", "imports.ts"],
       },
       null,
       2,
@@ -62,12 +65,17 @@ try {
     join(consumer, "tools.ts"),
     `import { Agent, getToolDefinitions, Policy, Tool } from "@theorvane/type-chain/legacy";\n\n@Agent({ systemPrompt: "Use legacy tools." })\nclass LegacyTools {\n  @Tool({ name: "search_issues", description: "Searches issues.", schema: { type: "object" } })\n  @Policy({ authorization: "required" })\n  search({ query }: { readonly query: string }) { return \`legacy:\${query}\`; }\n}\n\nconst definition = getToolDefinitions(new LegacyTools())[0];\nif (definition?.invoke({ query: "123" }) !== "legacy:123") throw new Error("Legacy tool was not registered.");\n`,
   );
+  writeFileSync(
+    join(consumer, "imports.ts"),
+    `import { getToolDefinitions } from "@theorvane/type-chain";\nimport { toLangChainTools } from "@theorvane/type-chain/langchain";\nimport { buildAgent } from "@theorvane/type-chain/agent";\nimport { createTypeMcpLangChainTools } from "@theorvane/type-chain/typemcp";\nvoid getToolDefinitions;\nvoid toLangChainTools;\nvoid buildAgent;\nvoid createTypeMcpLangChainTools;\n`,
+  );
   run(
     resolve(packageRoot, "node_modules/typescript/bin/tsc"),
     ["--project", "tsconfig.json"],
     consumer,
   );
   run("node", ["dist/tools.js"], consumer);
+  run("node", ["dist/imports.js"], consumer);
   console.log(
     "Verified packed CommonJS consumer with legacy TypeScript decorators.",
   );
