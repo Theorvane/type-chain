@@ -1,6 +1,6 @@
 # TypeChain documentation
 
-TypeChain is a decorator-first authoring layer for typed LangChain JS tools and agents. The published package is [`@theorvane/type-chain@0.1.1`](https://www.npmjs.com/package/@theorvane/type-chain).
+TypeChain is a decorator-first authoring layer for typed LangChain JS tools and agents. The published package is [`@theorvane/type-chain@0.2.0`](https://www.npmjs.com/package/@theorvane/type-chain).
 
 > **Published boundary:** TypeChain provides Stage 3 tool and policy declarations, immutable definitions, LangChain adaptation, an agent builder, and an in-process TypeMCP bridge. Applications retain ownership of **models, credentials, policy enforcement, state, hosting, deployment, and cross-process MCP transport**.
 

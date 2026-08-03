@@ -1,6 +1,6 @@
 # LangChain integration
 
-`@theorvane/type-chain@0.1.1` exposes a dedicated `/langchain` subpath that turns decorated methods into standard LangChain structured tools. LangChain owns schema parsing and validation; TypeChain preserves the explicit name, description, schema, and receiver-bound invocation.
+`@theorvane/type-chain@0.2.0` exposes a dedicated `/langchain` subpath that turns decorated methods into standard LangChain structured tools. LangChain owns schema parsing and validation; TypeChain preserves the explicit name, description, schema, and receiver-bound invocation.
 
 ## Prerequisites
 
@@ -11,7 +11,7 @@
 ## Install
 
 ```bash
-npm install @theorvane/type-chain@0.1.1 @langchain/core langchain zod
+npm install @theorvane/type-chain@0.2.0 @langchain/core langchain zod
 ```
 
 The root package remains independent of optional peers. Import `/langchain` only where the application needs this adapter.

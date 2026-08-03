@@ -2,7 +2,7 @@
 
 This chapter continues a strict TypeScript Petstore workspace with one TypeChain tool. It records explicit runtime metadata, inspects immutable definitions, and leaves real domain dependencies and execution ownership in the application.
 
-> **Published version:** The examples target [`@theorvane/type-chain@0.1.1`](https://www.npmjs.com/package/@theorvane/type-chain). They use standard TypeScript decorators rather than legacy `experimentalDecorators`.
+> **Published version:** The examples target [`@theorvane/type-chain@0.2.0`](https://www.npmjs.com/package/@theorvane/type-chain). They use standard TypeScript decorators rather than legacy `experimentalDecorators`.
 
 ## Before you start
 
@@ -31,7 +31,7 @@ The project can print the `find_product` definition. It does not create a model,
 From the workspace root, install the root package, a runtime schema, and local TypeScript runner if they are not already present:
 
 ```bash
-npm install @theorvane/type-chain@0.1.1 zod
+npm install @theorvane/type-chain@0.2.0 zod
 npm install --save-dev typescript tsx @types/node
 npm pkg set type=module
 npm pkg set scripts.check="tsc --noEmit"

@@ -1,6 +1,6 @@
 {
   "name": "@theorvane/type-chain",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Decorator-first, type-safe authoring layer for LangChain JS tools and agents.",
   "license": "MIT",
   "type": "module",
@@ -83,7 +83,7 @@
   ],
   "peerDependencies": {
     "@langchain/core": "^1.2.3",
-    "@theorvane/type-mcp": "^0.2.0",
+    "@theorvane/type-mcp": "^0.3.0",
     "langchain": "^1.5.4"
   },
   "peerDependenciesMeta": {
@@ -100,7 +100,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.5.5",
     "@langchain/core": "1.2.3",
-    "@theorvane/type-mcp": "0.2.2",
+    "@theorvane/type-mcp": "0.3.0",
     "langchain": "1.5.4",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
