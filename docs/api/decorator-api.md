@@ -1,6 +1,16 @@
 # Decorator API contract
 
-`@theorvane/type-chain@0.2.1` is the current public TypeChain release. It supports standard TypeScript Stage 3 decorators and explicit runtime schemas. It does not infer schemas from TypeScript parameter types or use legacy `reflect-metadata` behavior.
+`@theorvane/type-chain@0.2.1` is the current public TypeChain release. It supports standard TypeScript Stage 3 decorators and explicit runtime schemas. The separate `/legacy` entrypoint supports TypeScript legacy decorators. It does not infer schemas from TypeScript parameter types or use `reflect-metadata` behavior.
+
+## Supported import and decorator modes
+
+Every public entrypoint supports both ESM `import` and CommonJS `require`, with matching `.d.ts` and `.d.cts` declarations. Use the standard decorators from the root and `/agent` entrypoints in an ESM TypeScript project. For TypeScript legacy decorators, use only the separate `/legacy` entrypoint in a CommonJS project with `"experimentalDecorators": true`.
+
+| Consumer | Module settings | Decorator entrypoint |
+| --- | --- | --- |
+| ESM TypeScript | `module` and `moduleResolution`: `NodeNext`; `experimentalDecorators` off; include `ESNext.Decorators` | Root `Tool`/`Policy` and `/agent` `Agent` (standard Stage 3 semantics) |
+| CommonJS JavaScript | Node `require()` | Any public entrypoint |
+| CommonJS TypeScript | `module` and `moduleResolution`: `Node16`; `experimentalDecorators: true` | `/legacy` only (legacy TypeScript semantics) |
 
 ## Root package
 
@@ -161,5 +171,6 @@ and legacy decorators in one TypeScript compilation unit.
 | `@theorvane/type-chain/langchain` | Standard LangChain structured-tool adaptation. |
 | `@theorvane/type-chain/agent` | Decorator-first LangChain `createAgent()` bridge. |
 | `@theorvane/type-chain/typemcp` | In-process TypeMCP-to-LangChain composition. |
+| `@theorvane/type-chain/legacy` | Legacy TypeScript decorator metadata and optional LangChain helpers for CommonJS consumers. |
 
 For complete examples, read [Getting started](../guides/getting-started.md) and the related integration guides.
