@@ -20,6 +20,7 @@ const required = [
   "dist/legacy.js",
   "dist/legacy.cjs",
   "dist/legacy.d.ts",
+  "dist/legacy.d.cts",
   "README.md",
   "LICENSE",
 ];

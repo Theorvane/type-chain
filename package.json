@@ -81,7 +81,7 @@
     "test": "npm run build && npm run build:test-fixtures && npm run build:legacy-test-fixtures && node --test",
     "verify": "npm run lint && npm run typecheck && npm run test && npm run build && npm run verify:package",
     "verify:package": "node scripts/verify-package.mjs",
-    "verify:consumer": "node scripts/verify-packed-consumer.mjs && node scripts/verify-legacy-consumer.mjs",
+    "verify:consumer": "node scripts/verify-packed-consumer.mjs",
     "verify:publish": "npm run verify && npm run verify:consumer && npm pack --dry-run --json --ignore-scripts",
     "prepublishOnly": "node scripts/assert-release-readiness.mjs && npm run verify:publish"
   },

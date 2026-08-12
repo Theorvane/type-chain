@@ -14,7 +14,7 @@
 
 > **Runtime boundary:** TypeChain records declarations and composes standard LangChain tools and agents. Model selection, credentials, authorization, approvals, retries, timeouts, persistence, redaction, and audit policy remain application responsibilities.
 
-TypeChain keeps explicit runtime schemas and LangChain contracts visible while making TypeScript tool and agent declarations easier to author. It supports standard (Stage 3) decorators—without legacy reflection metadata—and delegates execution semantics to LangChain and, when used, TypeMCP.
+TypeChain keeps explicit runtime schemas and LangChain contracts visible while making TypeScript tool and agent declarations easier to author. It supports standard (Stage 3) decorators and, through the separate `/legacy` entrypoint, TypeScript legacy decorators without reflection metadata. It delegates execution semantics to LangChain and, when used, TypeMCP.
 
 ## Fast path
 
@@ -26,7 +26,7 @@ TypeChain keeps explicit runtime schemas and LangChain contracts visible while m
 
 ## Development setup
 
-TypeChain requires **Node.js 20 or later**, ESM-aware TypeScript configuration, and standard TypeScript decorators.
+TypeChain requires **Node.js 20 or later**. Standard decorators are supported in ESM TypeScript consumers; legacy TypeScript decorators are supported through the separate `/legacy` entrypoint in CommonJS consumers.
 
 ```bash
 npm install @theorvane/type-chain
@@ -42,7 +42,7 @@ npm ci
 npm run verify
 ```
 
-For a consuming TypeScript application, use a Node-aware compiler configuration and do **not** enable TypeScript's legacy `experimentalDecorators` mode for these root Stage 3 examples. CommonJS consumers can use Node16 module resolution with static imports of the root, `/langchain`, `/agent`, and `/typemcp` subpaths; the package selects matching CJS `.d.cts` declarations and `.cjs` runtime exports. CommonJS legacy decorator consumers must import decorators from `@theorvane/type-chain/legacy` and await its LangChain adapters; see the [Decorator API contract](docs/api/decorator-api.md#legacy-cjs-decorators).
+For a consuming TypeScript application, use a Node-aware compiler configuration and do **not** enable TypeScript's legacy `experimentalDecorators` mode for these root Stage 3 examples. All public entrypoints—the root, `/langchain`, `/agent`, `/typemcp`, and `/legacy`—ship ESM imports and CommonJS requires with matching TypeScript declarations. CommonJS legacy decorator consumers must import decorators from `@theorvane/type-chain/legacy`, use `"experimentalDecorators": true`, and await its LangChain adapters; see the [Decorator API contract](docs/api/decorator-api.md#supported-import-and-decorator-modes).
 
 ```json
 {

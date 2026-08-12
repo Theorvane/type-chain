@@ -15,21 +15,44 @@ const packageRoot = process.cwd();
 const manifest = JSON.parse(readFileSync("package.json", "utf8"));
 const packageName = manifest.name;
 const consumers = [];
+const npmCache = mkdtempSync(join(tmpdir(), "type-chain-npm-cache-"));
 let tarballPath;
+const entrypoints = [
+  [
+    packageName,
+    ["Policy", "Tool", "getToolDefinitions", "withToolPolicyGuard"],
+  ],
+  [`${packageName}/langchain`, ["toLangChainTools", "toGuardedLangChainTools"]],
+  [`${packageName}/agent`, ["Agent", "buildAgent", "buildGuardedAgent"]],
+  [
+    `${packageName}/typemcp`,
+    [
+      "createTypeMcpLangChainTools",
+      "createGuardedTypeMcpLangChainTools",
+      "createTypeMcpAgent",
+      "createGuardedTypeMcpAgent",
+    ],
+  ],
+  [`${packageName}/legacy`, ["Agent", "Policy", "Tool", "getToolDefinitions"]],
+];
 
 function run(command, args, cwd = packageRoot) {
   return execFileSync(command, args, {
     cwd,
     encoding: "utf8",
+    env:
+      command === "npm"
+        ? { ...process.env, npm_config_cache: npmCache }
+        : process.env,
     stdio: ["ignore", "pipe", "pipe"],
   });
 }
 
-function createConsumer(prefix) {
+function createConsumer(prefix, type) {
   const directory = mkdtempSync(join(tmpdir(), `${prefix}-`));
   consumers.push(directory);
   run("npm", ["init", "--yes"], directory);
-  run("npm", ["pkg", "set", "type=module"], directory);
+  run("npm", ["pkg", "set", `type=${type}`], directory);
   return directory;
 }
 
@@ -48,11 +71,41 @@ function install(consumer, ...packages) {
   );
 }
 
-function verifyImport(consumer, source) {
-  run("node", ["--input-type=module", "--eval", source], consumer);
+function verifyEntrypoints(consumer, mode) {
+  const source =
+    mode === "esm"
+      ? [
+          `const entrypoints = ${JSON.stringify(entrypoints)};`,
+          "for (const [specifier, names] of entrypoints) {",
+          "  const module = await import(specifier);",
+          "  for (const name of names) {",
+          "    if (!(name in module)) throw new Error('Missing ESM export ' + name + ' from ' + specifier);",
+          "  }",
+          "}",
+        ].join("\n")
+      : [
+          "const { createRequire } = require('node:module');",
+          "const requireFromConsumer = createRequire(process.cwd() + '/package.json');",
+          `const entrypoints = ${JSON.stringify(entrypoints)};`,
+          "for (const [specifier, names] of entrypoints) {",
+          "  const module = requireFromConsumer(specifier);",
+          "  for (const name of names) {",
+          "    if (!(name in module)) throw new Error('Missing CommonJS export ' + name + ' from ' + specifier);",
+          "  }",
+          "}",
+        ].join("\n");
+  run(
+    "node",
+    [
+      `--input-type=${mode === "esm" ? "module" : "commonjs"}`,
+      "--eval",
+      source,
+    ],
+    consumer,
+  );
 }
 
-function compileDocumentationSources(consumer, sources) {
+function compileConsumerSources(consumer, type, sources) {
   mkdirSync(join(consumer, "src"));
   writeFileSync(
     join(consumer, "tsconfig.json"),
@@ -60,13 +113,15 @@ function compileDocumentationSources(consumer, sources) {
       {
         compilerOptions: {
           target: "ES2022",
-          module: "NodeNext",
-          moduleResolution: "NodeNext",
-          lib: ["ES2022", "ESNext.Decorators", "DOM", "DOM.Iterable"],
+          module: type === "module" ? "NodeNext" : "Node16",
+          moduleResolution: type === "module" ? "NodeNext" : "Node16",
+          ...(type === "module"
+            ? { lib: ["ES2022", "ESNext.Decorators"] }
+            : { experimentalDecorators: true }),
           types: ["node"],
           strict: true,
           skipLibCheck: true,
-          verbatimModuleSyntax: true,
+          ...(type === "module" ? { verbatimModuleSyntax: true } : {}),
           rootDir: "src",
           outDir: "dist",
         },
@@ -80,7 +135,7 @@ function compileDocumentationSources(consumer, sources) {
     writeFileSync(join(consumer, "src", filename), source);
   run(
     resolve(packageRoot, "node_modules/typescript/bin/tsc"),
-    ["--noEmit", "--project", "tsconfig.json"],
+    ["--project", "tsconfig.json"],
     consumer,
   );
 }
@@ -91,53 +146,39 @@ try {
   const filename = getPackedTarballFilename(packed);
   tarballPath = resolve(packageRoot, filename);
 
-  const rootConsumer = createConsumer("type-chain-root-consumer");
-  install(rootConsumer, tarballPath, "zod", "@types/node");
-  compileDocumentationSources(rootConsumer, {
-    "petstore-tools.ts": `import { z } from "zod";\nimport { Tool } from ${JSON.stringify(packageName)};\n\nexport class PetstoreTools {\n  @Tool({ name: "find_product", description: "Find a Petstore product by SKU.", schema: z.object({ sku: z.string().min(1) }) })\n  findProduct({ sku }: { readonly sku: string }) { return { sku, available: true }; }\n}\n`,
-    "inspect-tools.ts": `import { getToolDefinitions } from ${JSON.stringify(packageName)};\nimport { PetstoreTools } from "./petstore-tools.js";\nexport const definitions = getToolDefinitions(new PetstoreTools());\n`,
-  });
-  verifyImport(
-    rootConsumer,
-    [
-      `const root = await import(${JSON.stringify(packageName)});`,
-      "for (const name of ['Policy', 'Tool', 'getToolDefinitions', 'withToolPolicyGuard']) {",
-      "  if (!(name in root)) throw new Error('Missing root export: ' + name);",
-      "}",
-    ].join("\n"),
+  const integrationConsumer = createConsumer(
+    "type-chain-esm-consumer",
+    "module",
   );
-
-  const integrationConsumer = createConsumer("type-chain-integration-consumer");
   const peers = [
     `@langchain/core@${manifest.devDependencies["@langchain/core"]}`,
     `langchain@${manifest.devDependencies.langchain}`,
     `@theorvane/type-mcp@${manifest.devDependencies["@theorvane/type-mcp"]}`,
   ];
   install(integrationConsumer, tarballPath, ...peers, "zod", "@types/node");
-  compileDocumentationSources(integrationConsumer, {
-    "petstore-tools.ts": `import { z } from "zod";\nimport { Tool } from ${JSON.stringify(packageName)};\n\nexport class PetstoreTools {\n  @Tool({ name: "find_product", description: "Find a Petstore product by SKU.", schema: z.object({ sku: z.string().min(1) }) })\n  findProduct({ sku }: { readonly sku: string }) { return { sku, available: true }; }\n}\n`,
-    "langchain-tools.ts": `import { toLangChainTools } from ${JSON.stringify(`${packageName}/langchain`)};\nimport { PetstoreTools } from "./petstore-tools.js";\nexport const tools = toLangChainTools(new PetstoreTools());\n`,
-    "petstore-agent.ts": `import { Agent, buildAgent } from ${JSON.stringify(`${packageName}/agent`)};\nimport { PetstoreTools } from "./petstore-tools.js";\n@Agent({ systemPrompt: "Use Petstore tools only." })\nclass PetstoreAgent extends PetstoreTools {}\ndeclare const applicationOwnedModel: Parameters<typeof buildAgent>[1]["model"];\nexport const agent = buildAgent(new PetstoreAgent(), { model: applicationOwnedModel });\n`,
-    "petstore-server.ts": `import { z } from "zod";\nimport { McpServer, McpTool } from "@theorvane/type-mcp";\nexport interface PetstoreClient { findBySku(sku: string): Promise<unknown>; }\n@McpServer({ name: "petstore", version: "1.0.0" })\nexport class PetstoreServer {\n  private client: PetstoreClient | undefined;\n  configure(client: PetstoreClient) { this.client = client; return this; }\n  @McpTool({ name: "find-product", description: "Find a Petstore product by SKU.", input: z.object({ sku: z.string().min(1) }) })\n  findProduct({ sku }: { readonly sku: string }) { if (this.client === undefined) throw new Error("Petstore client was not configured."); return this.client.findBySku(sku); }\n}\n`,
-    "typemcp-tools.ts": `import { createTypeMcpLangChainTools } from ${JSON.stringify(`${packageName}/typemcp`)};\nimport type { PetstoreClient } from "./petstore-server.js";\nimport { PetstoreServer } from "./petstore-server.js";\ndeclare const petstoreClient: PetstoreClient;\nexport const tools = await createTypeMcpLangChainTools(PetstoreServer, { resolver: { resolve: () => new PetstoreServer().configure(petstoreClient) } });\n`,
+  compileConsumerSources(integrationConsumer, "module", {
+    "standard-decorators.ts": `import { Policy, Tool, getToolDefinitions, withToolPolicyGuard } from ${JSON.stringify(packageName)};\nimport { toGuardedLangChainTools, toLangChainTools } from ${JSON.stringify(`${packageName}/langchain`)};\nimport { Agent, buildAgent, buildGuardedAgent } from ${JSON.stringify(`${packageName}/agent`)};\nimport { createGuardedTypeMcpAgent, createGuardedTypeMcpLangChainTools, createTypeMcpAgent, createTypeMcpLangChainTools } from ${JSON.stringify(`${packageName}/typemcp`)};\nimport * as legacy from ${JSON.stringify(`${packageName}/legacy`)};\n\n@Agent({ systemPrompt: "Use standard tools." })\nclass StandardTools {\n  @Policy({ authorization: "required" })\n  @Tool({ name: "search_issues", description: "Searches issues.", schema: { type: "object" } })\n  search({ query }: { readonly query: string }) { return \`standard:\${query}\`; }\n}\n\nconst definition = getToolDefinitions(new StandardTools())[0];\nif (definition?.invoke({ query: "123" }) !== "standard:123") throw new Error("Standard tool was not registered.");\nvoid withToolPolicyGuard;\nvoid toLangChainTools;\nvoid toGuardedLangChainTools;\nvoid buildAgent;\nvoid buildGuardedAgent;\nvoid createTypeMcpLangChainTools;\nvoid createGuardedTypeMcpLangChainTools;\nvoid createTypeMcpAgent;\nvoid createGuardedTypeMcpAgent;\nvoid legacy;\n`,
   });
-  verifyImport(
-    integrationConsumer,
-    [
-      `const langchain = await import(${JSON.stringify(`${packageName}/langchain`)});`,
-      `const agent = await import(${JSON.stringify(`${packageName}/agent`)});`,
-      `const typemcp = await import(${JSON.stringify(`${packageName}/typemcp`)});`,
-      "for (const [module, names] of [[langchain, ['toLangChainTools', 'toGuardedLangChainTools']], [agent, ['Agent', 'buildAgent', 'buildGuardedAgent']], [typemcp, ['createTypeMcpLangChainTools', 'createGuardedTypeMcpLangChainTools', 'createTypeMcpAgent', 'createGuardedTypeMcpAgent']]]) {",
-      "  for (const name of names) if (!(name in module)) throw new Error('Missing subpath export: ' + name);",
-      "}",
-    ].join("\n"),
+  run("node", ["dist/standard-decorators.js"], integrationConsumer);
+  verifyEntrypoints(integrationConsumer, "esm");
+
+  const commonJsConsumer = createConsumer(
+    "type-chain-commonjs-consumer",
+    "commonjs",
   );
+  install(commonJsConsumer, tarballPath, ...peers, "@types/node");
+  compileConsumerSources(commonJsConsumer, "commonjs", {
+    "legacy-decorators.ts": `import { getToolDefinitions } from ${JSON.stringify(packageName)};\nimport { toGuardedLangChainTools, toLangChainTools } from ${JSON.stringify(`${packageName}/langchain`)};\nimport { Agent as StandardAgent, buildAgent, buildGuardedAgent } from ${JSON.stringify(`${packageName}/agent`)};\nimport { createGuardedTypeMcpAgent, createGuardedTypeMcpLangChainTools, createTypeMcpAgent, createTypeMcpLangChainTools } from ${JSON.stringify(`${packageName}/typemcp`)};\nimport { Agent, Policy, Tool, getToolDefinitions as getLegacyToolDefinitions } from ${JSON.stringify(`${packageName}/legacy`)};\n\n@Agent({ systemPrompt: "Use legacy tools." })\nclass LegacyTools {\n  @Tool({ name: "search_issues", description: "Searches issues.", schema: { type: "object" } })\n  @Policy({ authorization: "required" })\n  search({ query }: { readonly query: string }) { return \`legacy:\${query}\`; }\n}\n\nconst definition = getLegacyToolDefinitions(new LegacyTools())[0];\nif (definition?.invoke({ query: "123" }) !== "legacy:123") throw new Error("Legacy tool was not registered.");\nvoid getToolDefinitions;\nvoid toLangChainTools;\nvoid toGuardedLangChainTools;\nvoid StandardAgent;\nvoid buildAgent;\nvoid buildGuardedAgent;\nvoid createTypeMcpLangChainTools;\nvoid createGuardedTypeMcpLangChainTools;\nvoid createTypeMcpAgent;\nvoid createGuardedTypeMcpAgent;\n`,
+  });
+  run("node", ["dist/legacy-decorators.js"], commonJsConsumer);
+  verifyEntrypoints(commonJsConsumer, "commonjs");
 
   console.log(
-    "Verified packed consumers: root without optional peers; langchain, agent, and typemcp with declared peers.",
+    "Verified packed ESM and CommonJS consumers: all public entrypoints load and resolve; standard and legacy decorators execute in their supported TypeScript modes.",
   );
 } finally {
   for (const consumer of consumers)
     rmSync(consumer, { force: true, recursive: true });
+  rmSync(npmCache, { force: true, recursive: true });
   if (tarballPath !== undefined) rmSync(tarballPath, { force: true });
 }

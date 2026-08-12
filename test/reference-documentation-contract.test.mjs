@@ -115,7 +115,8 @@ test("requires the project-starting TypeChain curriculum to preserve optional in
 
   assert.match(allContent, /@theorvane\/type-chain@0\.2\.1/);
   assert.doesNotMatch(allContent, /npm install @theorvane\/type-chain(?:\s|$)/);
-  assert.match(consumerScript, /packed consumers: root without optional peers/);
+  assert.match(consumerScript, /packed ESM and CommonJS consumers/);
+  assert.match(consumerScript, /all public entrypoints load and resolve/);
   assert.match(
     typeMcpContent,
     /new PetstoreServer\(\)\.configure\(petstoreClient\)/,
