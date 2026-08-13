@@ -30,22 +30,23 @@ test("CI verifies both integration and release branches", async () => {
 test("publish readiness verifies an installed packed consumer", async () => {
   const manifest = JSON.parse(await readWorkflow("../package.json"));
   const script = await readWorkflow("../scripts/verify-packed-consumer.mjs");
-  const legacyScript = await readWorkflow(
-    "../scripts/verify-legacy-consumer.mjs",
-  );
-
   const packJson = await readWorkflow("../scripts/pack-json.mjs");
 
   assert.match(manifest.scripts.verify, /verify:package/);
   assert.match(manifest.scripts["verify:publish"], /verify:consumer/);
+  assert.equal(
+    manifest.scripts["verify:consumer"],
+    "node scripts/verify-packed-consumer.mjs",
+  );
   assert.match(script, /"npm", \["pack", "--json", "--ignore-scripts"\]/);
   assert.match(script, /getPackedTarballFilename/);
-  assert.match(legacyScript, /getPackedTarballFilename/);
-  assert.match(legacyScript, /@theorvane\/type-mcp@0\.3\.1/);
-  assert.match(legacyScript, /@theorvane\/type-chain\/langchain/);
-  assert.match(legacyScript, /@theorvane\/type-chain\/agent/);
-  assert.match(legacyScript, /@theorvane\/type-chain\/typemcp/);
-  assert.match(legacyScript, /dist\/imports\.js/);
+  assert.match(script, /type-chain-esm-consumer/);
+  assert.match(script, /type-chain-commonjs-consumer/);
+  assert.match(script, /experimentalDecorators: true/);
+  assert.match(script, /ESNext\.Decorators/);
+  assert.match(script, /packageName,/);
+  for (const subpath of ["langchain", "agent", "typemcp", "legacy"])
+    assert.match(script, new RegExp(`packageName}/${subpath}`));
   assert.match(packJson, /Array\.isArray\(packed\)/);
   assert.match(packJson, /Object\.values\(packed \?\? \{\}\)/);
   assert.match(script, /toGuardedLangChainTools/);
@@ -61,7 +62,7 @@ test("public release metadata and documentation use the scoped first-release con
   const releaseGuide = await readWorkflow("../docs/release.md");
 
   assert.equal(manifest.name, "@theorvane/type-chain");
-  assert.equal(manifest.version, "0.2.1");
+  assert.equal(manifest.version, "0.2.2");
   assert.equal(manifest.peerDependencies["@theorvane/type-mcp"], "^0.3.0");
   assert.equal(manifest.publishConfig.access, "public");
   assert.match(readme, /Install from npm/);
