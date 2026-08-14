@@ -9,11 +9,11 @@ The intended public package is **`@theorvane/type-chain`**, published to npm via
 3. A reviewed, repository-owned `dev` → `main` promotion passes CI and `release-promotion`.
 4. npm Trusted Publishing is configured for this repository, `.github/workflows/publish.yml`, and the protected `npm` GitHub Environment.
 5. The named version is absent from the npm registry, or an existing package proves it was produced from the exact protected `main` SHA.
-6. Every open dependency advisory has a documented maintainer disposition; a clean production audit alone does not close that decision.
+6. Each release independently checks dependency advisories and records a maintainer disposition for every open alert; a clean production audit alone does not close that decision.
 
 ### Current advisory disposition
 
-The current open Dependabot alert is a moderate advisory in `@hono/node-server`, installed only through the development dependency path `@theorvane/type-mcp` → `@modelcontextprotocol/sdk` → `@hono/node-server`. `npm audit --omit=dev --audit-level=low` is clean for the packed root artifact. TypeMCP's HTTP transport cannot be superficially downgraded without losing the required web-standard transport support; track remediation with the upstream TypeMCP transport work rather than publishing a misleading downgrade.
+All Dependabot alerts have been resolved. The esbuild advisory `GHSA-g7r4-m6w7-qqqr` is fixed by the development-only `esbuild` 0.28.2 override; it is not included in the packed root artifact. Recheck advisories independently for every release.
 
 ## Explicit publication path
 
