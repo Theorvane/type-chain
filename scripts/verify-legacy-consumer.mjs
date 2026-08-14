@@ -36,7 +36,7 @@ try {
       "--no-fund",
       tarballPath,
       "@langchain/core@1.2.3",
-      "@theorvane/type-mcp@0.3.1",
+      "@theorvane/type-mcp@0.3.2",
       "langchain@1.5.4",
       "@types/node",
     ],
