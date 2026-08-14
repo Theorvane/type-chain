@@ -71,6 +71,9 @@
   "publishConfig": {
     "access": "public"
   },
+  "overrides": {
+    "esbuild": "0.28.2"
+  },
   "scripts": {
     "build": "tsc --project tsconfig.build.json && tsup src/index.ts src/langchain.ts src/agent.ts src/typemcp.ts src/legacy.ts --format cjs --dts --out-dir dist --clean=false && tsup src/legacy.ts --format esm --out-dir dist --clean=false",
     "lint": "biome check .",
