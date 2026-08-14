@@ -62,7 +62,7 @@ test("public release metadata and documentation use the scoped first-release con
   const releaseGuide = await readWorkflow("../docs/release.md");
 
   assert.equal(manifest.name, "@theorvane/type-chain");
-  assert.equal(manifest.version, "0.2.2");
+  assert.equal(manifest.version, "0.2.3");
   assert.equal(manifest.peerDependencies["@theorvane/type-mcp"], "^0.3.0");
   assert.equal(manifest.publishConfig.access, "public");
   assert.match(readme, /Install from npm/);
@@ -73,6 +73,16 @@ test("public release metadata and documentation use the scoped first-release con
     /published to npm via GitHub Actions OIDC Trusted Publishing/,
   );
   assert.match(releaseGuide, /0\.1\.0/);
+});
+
+test("development lockfile resolves esbuild outside the Windows dev-server advisory", async () => {
+  const manifest = JSON.parse(await readWorkflow("../package.json"));
+  const lockfile = JSON.parse(await readWorkflow("../package-lock.json"));
+  const esbuild = lockfile.packages["node_modules/esbuild"];
+
+  assert.equal(manifest.overrides.esbuild, "0.28.2");
+  assert.equal(esbuild.version, "0.28.2");
+  assert.match(esbuild.resolved, /esbuild-0\.28\.2\.tgz$/);
 });
 
 test("release workflow uses a token-free OIDC-only exact-SHA publication path", async () => {
