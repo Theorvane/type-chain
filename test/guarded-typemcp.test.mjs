@@ -55,7 +55,10 @@ test("runs an application guard before an in-process TypeMCP agent tool", async 
       message.type === "tool" && message.tool_call_id === "tool-call",
   );
 
-  assert.equal(toolResult?.content, "external-api:guarded");
+  assert.equal(
+    toolResult?.content,
+    JSON.stringify({ result: "external-api:guarded" }),
+  );
   assert.deepEqual(guardCalls, [
     {
       name: "search_issues",

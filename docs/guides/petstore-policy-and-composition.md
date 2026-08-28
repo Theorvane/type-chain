@@ -5,7 +5,7 @@ This chapter continues the [Petstore TypeChain foundation](petstore-typechain-fo
 ## Before you start
 
 - Complete [Petstore TypeChain foundation](petstore-typechain-foundation.md) and confirm `npm run check` and `npm run inspect-tools` work.
-- Node.js 20 or later with `@theorvane/type-chain@0.2.1` and `zod` installed.
+- Node.js 20 or later with `@theorvane/type-chain@0.2.4` and `zod` installed.
 - Select **one** optional route only after the root declaration is useful: `/langchain`, `/agent`, or `/typemcp`.
 
 ## Workspace checkpoint
@@ -26,7 +26,7 @@ Optional routes can add `langchain-tools.ts`, `petstore-agent.ts`, or `typemcp-t
 The policy metadata itself needs only the root package and Zod:
 
 ```bash
-npm install @theorvane/type-chain@0.2.1 zod
+npm install @theorvane/type-chain@0.2.4 zod
 npm run check
 ```
 
@@ -37,7 +37,7 @@ Install optional peers only when selecting one route:
 npm install @langchain/core langchain
 
 # In-process TypeMCP bridge
-npm install @theorvane/type-mcp@0.3.1 @langchain/core langchain
+npm install @theorvane/type-mcp@0.4.0 @langchain/core langchain
 ```
 
 ## Record policy intent
@@ -145,7 +145,7 @@ export const tools = await createTypeMcpLangChainTools(PetstoreServer, {
 });
 ```
 
-The released TypeMCP `@McpServer` contract requires a zero-argument decorated constructor. Configure the application-owned dependency through the explicit resolver rather than constructor injection. This bridge converts TypeMCP tools to native LangChain tools in process. It does not start stdio or HTTP, create an MCP client/session, or provide cross-process transport. Use TypeMCP’s own transport hosts when another process must reach an MCP server.
+TypeMCP 0.4.0 supports constructor-injected application dependencies through an explicit resolver. Construct the decorated server with the application-owned dependency in that resolver. This bridge converts TypeMCP tools to native LangChain tools in process. It does not start stdio or HTTP, create an MCP client/session, or provide cross-process transport. Use TypeMCP’s own transport hosts when another process must reach an MCP server.
 
 ## Run and verify
 
