@@ -124,7 +124,7 @@
     "@biomejs/biome": "^2.5.5",
     "@langchain/core": "1.2.8",
     "@theorvane/type-mcp": "0.3.2",
-    "langchain": "1.5.5",
+    "langchain": "1.5.10",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "zod": "^4.4.3",
