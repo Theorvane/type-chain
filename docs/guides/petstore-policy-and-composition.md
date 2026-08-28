@@ -5,7 +5,7 @@ This chapter continues the [Petstore TypeChain foundation](petstore-typechain-fo
 ## Before you start
 
 - Complete [Petstore TypeChain foundation](petstore-typechain-foundation.md) and confirm `npm run check` and `npm run inspect-tools` work.
-- Node.js 20 or later with `@theorvane/type-chain@0.2.3` and `zod` installed.
+- Node.js 20 or later with `@theorvane/type-chain@0.2.4` and `zod` installed.
 - Select **one** optional route only after the root declaration is useful: `/langchain`, `/agent`, or `/typemcp`.
 
 ## Workspace checkpoint
@@ -26,7 +26,7 @@ Optional routes can add `langchain-tools.ts`, `petstore-agent.ts`, or `typemcp-t
 The policy metadata itself needs only the root package and Zod:
 
 ```bash
-npm install @theorvane/type-chain@0.2.3 zod
+npm install @theorvane/type-chain@0.2.4 zod
 npm run check
 ```
 
