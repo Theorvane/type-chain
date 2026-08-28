@@ -12,7 +12,7 @@ The published `@theorvane/type-chain@0.2.3` `/typemcp` subpath composes a TypeMC
 ## Install
 
 ```bash
-npm install @theorvane/type-chain@0.2.3 @theorvane/type-mcp@0.3.2 @langchain/core langchain zod
+npm install @theorvane/type-chain@0.2.3 @theorvane/type-mcp@0.4.0 @langchain/core langchain zod
 ```
 
 This is an optional integration boundary; the root TypeChain package does not import TypeMCP or LangChain peers.
@@ -38,7 +38,7 @@ Leave `experimentalDecorators` off.
 
 ## Convert a TypeMCP server to LangChain tools
 
-Create `src/catalog-server.ts` as a zero-argument TypeMCP-decorated server with an application-owned configuration seam. Then create `src/typemcp-tools.ts`:
+Create `src/catalog-server.ts` as a TypeMCP-decorated server with an application-owned constructor dependency. Then create `src/typemcp-tools.ts`:
 
 ```ts
 import { createTypeMcpLangChainTools } from "@theorvane/type-chain/typemcp";
@@ -53,7 +53,7 @@ export const tools = await createTypeMcpLangChainTools(CatalogServer, {
 });
 ```
 
-The released TypeMCP `@McpServer` contract requires a zero-argument decorated constructor. The explicit resolver configures the application-owned dependency before TypeChain delegates to TypeMCP's `createLangChainTools()`.
+TypeMCP 0.4.0 supports default zero-argument resolution and explicit resolver-backed construction. The explicit resolver constructs the server with its application-owned dependency before TypeChain delegates to TypeMCP's `createLangChainTools()`.
 
 ## Expected behavior
 
