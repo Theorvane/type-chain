@@ -62,7 +62,7 @@ test("public release metadata and documentation use the scoped first-release con
   const releaseGuide = await readWorkflow("../docs/release.md");
 
   assert.equal(manifest.name, "@theorvane/type-chain");
-  assert.equal(manifest.version, "0.2.3");
+  assert.equal(manifest.version, "0.2.4");
   assert.equal(manifest.peerDependencies["@theorvane/type-mcp"], "^0.4.0");
   assert.equal(manifest.devDependencies["@theorvane/type-mcp"], "0.4.0");
   assert.equal(manifest.publishConfig.access, "public");
