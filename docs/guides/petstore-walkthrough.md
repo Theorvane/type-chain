@@ -129,7 +129,7 @@ export const agent = buildAgent(new PetstoreAgent(), {
 When a TypeMCP-decorated Petstore server and the LangChain application live in the same Node.js process, install the bridge peers:
 
 ```bash
-npm install @theorvane/type-chain@0.2.3 @theorvane/type-mcp@0.3.2 @langchain/core langchain zod
+npm install @theorvane/type-chain@0.2.3 @theorvane/type-mcp@0.4.0 @langchain/core langchain zod
 ```
 
 Create `src/petstore-server.ts`:
@@ -181,7 +181,7 @@ export const tools = await createTypeMcpLangChainTools(PetstoreServer, {
 });
 ```
 
-The TypeMCP-decorated class deliberately keeps a zero-argument constructor because that is the published `@McpServer` contract in `0.3.0`. The explicit resolver configures the application-owned client before conversion; keep that composition-root seam while preserving the TypeMCP declaration contract.
+TypeMCP 0.4.0 supports an explicit resolver for constructor-injected application dependencies. The resolver constructs `PetstoreServer` with the application-owned client before conversion; keep that composition-root seam explicit.
 
 The resolver and `petstoreClient` remain application-owned. The bridge converts TypeMCP tools to native LangChain tools in process. It does not start stdio/HTTP, create an MCP client/session, or grant cross-process access. Use TypeMCP transport hosts separately when a client must reach another process.
 

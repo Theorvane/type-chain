@@ -22,7 +22,7 @@ test("composes a resolver-backed TypeMCP external API tool in process", async ()
   assert.equal(tools[0]?.name, "search_issues");
   assert.equal(
     await tools[0]?.invoke({ query: "bridge" }),
-    "external-api:bridge",
+    JSON.stringify({ result: "external-api:bridge" }),
   );
   await assert.rejects(() => tools[0]?.invoke({ query: "" }));
 });
@@ -56,5 +56,8 @@ test("builds an agent that invokes the resolver-backed TypeMCP external API tool
       message.type === "tool" && message.tool_call_id === "search-call",
   );
 
-  assert.equal(toolResult?.content, "external-api:agent");
+  assert.equal(
+    toolResult?.content,
+    JSON.stringify({ result: "external-api:agent" }),
+  );
 });

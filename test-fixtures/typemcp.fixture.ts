@@ -11,7 +11,12 @@ export class FakeExternalApiClient implements ExternalApiClient {
   }
 }
 
-@McpServer({ name: "external_api", version: "1.0.0" })
+@McpServer({
+  name: "external_api",
+  version: "1.0.0",
+  title: "External issue API",
+  instructions: "Use search_issues to query the external issue API.",
+})
 export class ExternalApiServer {
   private readonly client: ExternalApiClient;
 
@@ -24,11 +29,16 @@ export class ExternalApiServer {
 
   @McpTool({
     name: "search_issues",
+    title: "Search issues",
     description: "Search issues through an external API.",
     input: z.object({ query: z.string().min(1) }),
+    outputSchema: z.object({ result: z.string() }),
+    annotations: { readOnlyHint: true },
   })
-  async searchIssues(input: { readonly query: string }): Promise<string> {
-    return this.client.searchIssues(input);
+  async searchIssues(input: {
+    readonly query: string;
+  }): Promise<{ readonly result: string }> {
+    return { result: await this.client.searchIssues(input) };
   }
 }
 

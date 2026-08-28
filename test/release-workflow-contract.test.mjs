@@ -63,7 +63,8 @@ test("public release metadata and documentation use the scoped first-release con
 
   assert.equal(manifest.name, "@theorvane/type-chain");
   assert.equal(manifest.version, "0.2.3");
-  assert.equal(manifest.peerDependencies["@theorvane/type-mcp"], "^0.3.0");
+  assert.equal(manifest.peerDependencies["@theorvane/type-mcp"], "^0.4.0");
+  assert.equal(manifest.devDependencies["@theorvane/type-mcp"], "0.4.0");
   assert.equal(manifest.publishConfig.access, "public");
   assert.match(readme, /Install from npm/);
   assert.match(readme, /npm install @theorvane\/type-chain/);

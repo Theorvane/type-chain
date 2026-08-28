@@ -37,7 +37,7 @@ Install optional peers only when selecting one route:
 npm install @langchain/core langchain
 
 # In-process TypeMCP bridge
-npm install @theorvane/type-mcp@0.3.2 @langchain/core langchain
+npm install @theorvane/type-mcp@0.4.0 @langchain/core langchain
 ```
 
 ## Record policy intent
@@ -145,7 +145,7 @@ export const tools = await createTypeMcpLangChainTools(PetstoreServer, {
 });
 ```
 
-The released TypeMCP `@McpServer` contract requires a zero-argument decorated constructor. Configure the application-owned dependency through the explicit resolver rather than constructor injection. This bridge converts TypeMCP tools to native LangChain tools in process. It does not start stdio or HTTP, create an MCP client/session, or provide cross-process transport. Use TypeMCP’s own transport hosts when another process must reach an MCP server.
+TypeMCP 0.4.0 supports constructor-injected application dependencies through an explicit resolver. Construct the decorated server with the application-owned dependency in that resolver. This bridge converts TypeMCP tools to native LangChain tools in process. It does not start stdio or HTTP, create an MCP client/session, or provide cross-process transport. Use TypeMCP’s own transport hosts when another process must reach an MCP server.
 
 ## Run and verify
 
